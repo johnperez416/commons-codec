@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,21 +17,24 @@
 
 package org.apache.commons.codec.language.bm;
 
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.StringEncoder;
-import org.apache.commons.codec.StringEncoderAbstractTest;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.codec.AbstractStringEncoderTest;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.StringEncoder;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests BeiderMorseEncoder.
- *
- * @since 1.6
  */
-public class BeiderMorseEncoderTest extends StringEncoderAbstractTest<StringEncoder> {
+public class BeiderMorseEncoderTest extends AbstractStringEncoderTest<StringEncoder> {
     private static final char[] TEST_CHARS = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'o', 'u' };
 
     private void assertNotEmpty(final BeiderMorseEncoder bmpm, final String value) throws EncoderException {
@@ -186,7 +189,7 @@ public class BeiderMorseEncoderTest extends StringEncoderAbstractTest<StringEnco
      */
     @Test /* timeout = 20000L */
     public void testSpeedCheck() throws EncoderException {
-        final BeiderMorseEncoder bmpm = this.createGenericApproxEncoder();
+        final BeiderMorseEncoder bmpm = createGenericApproxEncoder();
         final StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append(TEST_CHARS[0]);
         for (int i = 0, j = 1; i < 40; i++, j++) {
@@ -200,7 +203,7 @@ public class BeiderMorseEncoderTest extends StringEncoderAbstractTest<StringEnco
 
     @Test
     public void testSpeedCheck2() throws EncoderException {
-        final BeiderMorseEncoder bmpm = this.createGenericApproxEncoder();
+        final BeiderMorseEncoder bmpm = createGenericApproxEncoder();
         final String phrase = "ItstheendoftheworldasweknowitandIfeelfine";
 
         for (int i = 1; i <= phrase.length(); i++) {
@@ -210,7 +213,7 @@ public class BeiderMorseEncoderTest extends StringEncoderAbstractTest<StringEnco
 
     @Test
     public void testSpeedCheck3() throws EncoderException {
-        final BeiderMorseEncoder bmpm = this.createGenericApproxEncoder();
+        final BeiderMorseEncoder bmpm = createGenericApproxEncoder();
         final String phrase = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
 
         for (int i = 1; i <= phrase.length(); i++) {

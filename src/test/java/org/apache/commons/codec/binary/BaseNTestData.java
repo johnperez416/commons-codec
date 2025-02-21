@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,12 +24,10 @@ import java.util.Random;
 
 /**
  * Data and functions common to BaseN tests.
- *
- * @since 1.15
  */
 public class BaseNTestData {
 
-    final static byte[] DECODED
+    static final byte[] DECODED
             = {-12, -125, -51, 43, 5, 47, 116, -72, -120, 2, -98, -100, -73, 61, 118, 74, 36, 38, 56, 107, 45, 91, 38,
             47, 72, -9, -98, -66, -25, -61, -122, -68, -38, -62, -50, -71, -66, -116, -92, 42, 54, -56, -113, 125,
             -40, 89, 54, -67, -60, 14, -36, -4, 81, -14, -91, 103, 37, -83, -104, 80, -18, -119, -33, 115, 114, 68,
@@ -77,59 +75,24 @@ public class BaseNTestData {
             -22, 1, 127, -81, -4, -6, -119, 96, 35, -91, 114, 81, 91, 90, -86, -36, 34, -39, 93, -42, 69, 103, -11,
             107, -87, 119, -107, -114, -45, -128, -69, 96};
 
-    /**
-     * Read all bytes from an InputStream into a byte array.
-     *
-     * @param in the input stream.
-     * @return the byte array
-     *
-     * @throws IOException if an error occurs whilst reading the input stream
-     */
-    static byte[] streamToBytes(final InputStream in) throws IOException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        final byte[] buf = new byte[4096];
-        int read;
-        while ((read = in.read(buf)) > -1) {
-            os.write(buf, 0, read);
-        }
-        return os.toByteArray();
-    }
+    private static final int SIZE_KEY = 0;
 
-    private final static int SIZE_KEY = 0;
-    private final static int LAST_READ_KEY = 1;
+    private static final int LAST_READ_KEY = 1;
 
     /**
-     * Read all bytes from an InputStream into a byte array
-     * in chunks of {@code buf.length}.
+     * Tests the supplied byte[] array to see if it contains the specified byte c.
      *
-     * @param in the input stream.
-     * @param buf the byte array to use for chunking
-     *
-     * @return the bytes read from the input stream
-     *
-     * @throws IOException if an error occurs whilst reading the input stream
+     * @param bytes byte[] array to test
+     * @param c byte to look for
+     * @return true if bytes contains c, false otherwise
      */
-    static byte[] streamToBytes(final InputStream in, byte[] buf) throws IOException {
-        try {
-            int[] status = fill(buf, 0, in);
-            int size = status[SIZE_KEY];
-            int lastRead = status[LAST_READ_KEY];
-            while (lastRead != -1) {
-                buf = resizeArray(buf);
-                status = fill(buf, size, in);
-                size = status[SIZE_KEY];
-                lastRead = status[LAST_READ_KEY];
-            }
-            if (buf.length != size) {
-                final byte[] smallerBuf = new byte[size];
-                System.arraycopy(buf, 0, smallerBuf, 0, size);
-                buf = smallerBuf;
+    static boolean bytesContain(final byte[] bytes, final byte c) {
+        for (final byte b : bytes) {
+            if (b == c) {
+                return true;
             }
         }
-        finally {
-            in.close();
-        }
-        return buf;
+        return false;
     }
 
     private static int[] fill(final byte[] buf, final int offset, final InputStream in)
@@ -148,12 +111,6 @@ public class BaseNTestData {
         return new int[]{offset + read, lastRead};
     }
 
-    private static byte[] resizeArray(final byte[] bytes) {
-        final byte[] biggerBytes = new byte[bytes.length * 2];
-        System.arraycopy(bytes, 0, biggerBytes, 0, bytes.length);
-        return biggerBytes;
-    }
-
     /**
      * Returns an encoded and decoded copy of the same random data.
      *
@@ -169,17 +126,57 @@ public class BaseNTestData {
         return new byte[][] {decoded, encoded};
     }
 
+    private static byte[] resizeArray(final byte[] bytes) {
+        final byte[] biggerBytes = new byte[bytes.length * 2];
+        System.arraycopy(bytes, 0, biggerBytes, 0, bytes.length);
+        return biggerBytes;
+    }
+
     /**
-     * Tests the supplied byte[] array to see if it contains the specified byte c.
+     * Read all bytes from an InputStream into a byte array.
      *
-     * @param bytes byte[] array to test
-     * @param c byte to look for
-     * @return true if bytes contains c, false otherwise
+     * @param in the input stream.
+     * @return the byte array
+     * @throws IOException if an error occurs whilst reading the input stream
      */
-    static boolean bytesContain(final byte[] bytes, final byte c) {
-        for (final byte b : bytes) {
-            if (b == c) { return true; }
+    static byte[] streamToBytes(final InputStream in) throws IOException {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final byte[] buf = new byte[4096];
+        int read;
+        while ((read = in.read(buf)) > -1) {
+            os.write(buf, 0, read);
         }
-        return false;
+        return os.toByteArray();
+    }
+
+    /**
+     * Read all bytes from an InputStream into a byte array
+     * in chunks of {@code buf.length}.
+     *
+     * @param in the input stream.
+     * @param buf the byte array to use for chunking
+     * @return the bytes read from the input stream
+     * @throws IOException if an error occurs whilst reading the input stream
+     */
+    static byte[] streamToBytes(final InputStream in, byte[] buf) throws IOException {
+        try {
+            int[] status = fill(buf, 0, in);
+            int size = status[SIZE_KEY];
+            int lastRead = status[LAST_READ_KEY];
+            while (lastRead != -1) {
+                buf = resizeArray(buf);
+                status = fill(buf, size, in);
+                size = status[SIZE_KEY];
+                lastRead = status[LAST_READ_KEY];
+            }
+            if (buf.length != size) {
+                final byte[] smallerBuf = new byte[size];
+                System.arraycopy(buf, 0, smallerBuf, 0, size);
+                buf = smallerBuf;
+            }
+        } finally {
+            in.close();
+        }
+        return buf;
     }
 }

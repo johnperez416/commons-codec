@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,15 +17,17 @@
 
 package org.apache.commons.codec;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  */
-public abstract class StringEncoderAbstractTest<T extends StringEncoder> {
+public abstract class AbstractStringEncoderTest<T extends StringEncoder> {
 
     protected T stringEncoder = this.createStringEncoder();
 
@@ -39,7 +41,7 @@ public abstract class StringEncoderAbstractTest<T extends StringEncoder> {
         }
     }
 
-    protected void checkEncodingVariations(final String expected, final String data[]) throws EncoderException {
+    protected void checkEncodingVariations(final String expected, final String[] data) throws EncoderException {
         for (final String element : data) {
             this.checkEncoding(expected, element);
         }
@@ -75,10 +77,10 @@ public abstract class StringEncoderAbstractTest<T extends StringEncoder> {
     public void testLocaleIndependence() throws Exception {
         final StringEncoder encoder = this.getStringEncoder();
 
-        final String[] data = {"I", "i",};
+        final String[] data = { "I", "i" };
 
         final Locale orig = Locale.getDefault();
-        final Locale[] locales = {Locale.ENGLISH, new Locale("tr"), Locale.getDefault()};
+        final Locale[] locales = { Locale.ENGLISH, new Locale("tr"), Locale.getDefault() };
 
         try {
             for (final String element : data) {

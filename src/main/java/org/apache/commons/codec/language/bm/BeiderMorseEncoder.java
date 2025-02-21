@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,15 @@ import org.apache.commons.codec.StringEncoder;
 /**
  * Encodes strings into their Beider-Morse phonetic encoding.
  * <p>
- * Beider-Morse phonetic encodings are optimised for family names. However, they may be useful for a wide range of
+ * Beider-Morse phonetic encodings are optimized for family names. However, they may be useful for a wide range of
  * words.
+ * </p>
  * <p>
  * This encoder is intentionally mutable to allow dynamic configuration through bean properties. As such, it is mutable,
  * and may not be thread-safe. If you require a guaranteed thread-safe encoding then use {@link PhoneticEngine}
  * directly.
- * <p>
- * <b>Encoding overview</b>
+ * </p>
+ * <h2>Encoding overview</h2>
  * <p>
  * Beider-Morse phonetic encodings is a multi-step process. Firstly, a table of rules is consulted to guess what
  * language the word comes from. For example, if it ends in "{@code ault}" then it infers that the word is French.
@@ -42,14 +43,15 @@ import org.apache.commons.codec.StringEncoder;
  * representation. Again, sometimes there are multiple ways this could be done and sometimes things that can be
  * pronounced in several ways in the source language have only one way to represent them in this average phonetic
  * language, so the result is again a set of phonetic spellings.
+ * </p>
  * <p>
  * Some names are treated as having multiple parts. This can be due to two things. Firstly, they may be hyphenated. In
  * this case, each individual hyphenated word is encoded, and then these are combined end-to-end for the final encoding.
  * Secondly, some names have standard prefixes, for example, "{@code Mac/Mc}" in Scottish (English) names. As
  * sometimes it is ambiguous whether the prefix is intended or is an accident of the spelling, the word is encoded once
  * with the prefix and once without it. The resulting encoding contains one and then the other result.
- * <p>
- * <b>Encoding format</b>
+ * </p>
+ * <h2>Encoding format</h2>
  * <p>
  * Individual phonetic spellings of an input word are represented in upper- and lower-case roman characters. Where there
  * are multiple possible phonetic representations, these are joined with a pipe ({@code |}) character. If multiple
@@ -57,6 +59,7 @@ import org.apache.commons.codec.StringEncoder;
  * these blocks are then joined with hyphens. For example, "{@code d'ortley}" has a possible prefix. The form
  * without prefix encodes to "{@code ortlaj|ortlej}", while the form with prefix encodes to "
  * {@code dortlaj|dortlej}". Thus, the full, combined encoding is "{@code (ortlaj|ortlej)-(dortlaj|dortlej)}".
+ * </p>
  * <p>
  * The encoded forms are often quite a bit longer than the input strings. This is because a single input may have many
  * potential phonetic interpretations. For example, "{@code Renault}" encodes to "
@@ -64,23 +67,32 @@ import org.apache.commons.codec.StringEncoder;
  * encodings as they consider a wider range of possible, approximate phonetic interpretations of the original word.
  * Down-stream applications may wish to further process the encoding for indexing or lookup purposes, for example, by
  * splitting on pipe ({@code |}) and indexing under each of these alternatives.
- * <p>
- * <b>Note</b>: this version of the Beider-Morse encoding is equivalent with v3.4 of the reference implementation.
  * </p>
- * @see <a href="http://stevemorse.org/phonetics/bmpm.htm">Beider-Morse Phonetic Matching</a>
- * @see <a href="http://stevemorse.org/phoneticinfo.htm">Reference implementation</a>
+ * <p>
+ * <strong>Note</strong>: this version of the Beider-Morse encoding is equivalent with v3.4 of the reference implementation.
+ * </p>
+ * @see <a href="https://stevemorse.org/phonetics/bmpm.htm">Beider-Morse Phonetic Matching</a>
+ * @see <a href="https://stevemorse.org/phoneticinfo.htm">Reference implementation</a>
  *
  * <p>
- * This class is Not ThreadSafe
+ * This class is Not ThreadSafe.
  * </p>
  * @since 1.6
  */
 public class BeiderMorseEncoder implements StringEncoder {
+
     // Implementation note: This class is a spring-friendly facade to PhoneticEngine. It allows read/write configuration
     // of an immutable PhoneticEngine instance that will be delegated to for the actual encoding.
 
     // a cached object
     private PhoneticEngine engine = new PhoneticEngine(NameType.GENERIC, RuleType.APPROX, true);
+
+    /**
+     * Constructs a new instance.
+     */
+    public BeiderMorseEncoder() {
+        // empty
+    }
 
     @Override
     public Object encode(final Object source) throws EncoderException {
@@ -140,6 +152,20 @@ public class BeiderMorseEncoder implements StringEncoder {
     }
 
     /**
+     * Sets the number of maximum of phonemes that shall be considered by the engine.
+     *
+     * @param maxPhonemes
+     *            the maximum number of phonemes returned by the engine
+     * @since 1.7
+     */
+    public void setMaxPhonemes(final int maxPhonemes) {
+        this.engine = new PhoneticEngine(this.engine.getNameType(),
+                                         this.engine.getRuleType(),
+                                         this.engine.isConcat(),
+                                         maxPhonemes);
+    }
+
+    /**
      * Sets the type of name. Use {@link NameType#GENERIC} unless you specifically want phonetic encodings
      * optimized for Ashkenazi or Sephardic Jewish family names.
      *
@@ -164,20 +190,6 @@ public class BeiderMorseEncoder implements StringEncoder {
                                          ruleType,
                                          this.engine.isConcat(),
                                          this.engine.getMaxPhonemes());
-    }
-
-    /**
-     * Sets the number of maximum of phonemes that shall be considered by the engine.
-     *
-     * @param maxPhonemes
-     *            the maximum number of phonemes returned by the engine
-     * @since 1.7
-     */
-    public void setMaxPhonemes(final int maxPhonemes) {
-        this.engine = new PhoneticEngine(this.engine.getNameType(),
-                                         this.engine.getRuleType(),
-                                         this.engine.isConcat(),
-                                         maxPhonemes);
     }
 
 }

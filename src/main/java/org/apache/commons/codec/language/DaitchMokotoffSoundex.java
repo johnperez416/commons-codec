@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,7 +53,7 @@ import org.apache.commons.codec.StringEncoder;
  * <li>{@link #soundex(String)} - branching enabled, all codes will be returned, separated by '|'
  * </ul>
  * <p>
- * Note: this implementation has additional branching rules compared to the original description of the algorithm. The
+ * Note: This implementation has additional branching rules compared to the original description of the algorithm. The
  * rules can be customized by overriding the default rules contained in the resource file
  * {@code org/apache/commons/codec/language/dmrules.txt}.
  * </p>
@@ -62,12 +62,16 @@ import org.apache.commons.codec.StringEncoder;
  * </p>
  *
  * @see Soundex
- * @see <a href="http://en.wikipedia.org/wiki/Daitch%E2%80%93Mokotoff_Soundex"> Wikipedia - Daitch-Mokotoff Soundex</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Daitch%E2%80%93Mokotoff_Soundex"> Wikipedia - Daitch-Mokotoff Soundex</a>
  * @see <a href="http://www.avotaynu.com/soundex.htm">Avotaynu - Soundexing and Genealogy</a>
- *
  * @since 1.10
  */
 public class DaitchMokotoffSoundex implements StringEncoder {
+
+    /**
+     * The NUL character.
+     */
+    private static final char NUL = '\0';
 
     /**
      * Inner class representing a branch during DM soundex encoding.
@@ -205,6 +209,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
     }
 
     private static final String COMMENT = "//";
+
     private static final String DOUBLE_QUOTE = "\"";
 
     private static final String MULTILINE_COMMENT_END = "*/";
@@ -212,7 +217,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
     private static final String MULTILINE_COMMENT_START = "/*";
 
     /** The resource file containing the replacement and folding rules */
-    private static final String RESOURCE_FILE = "org/apache/commons/codec/language/dmrules.txt";
+    private static final String RESOURCE_FILE = "/org/apache/commons/codec/language/dmrules.txt";
 
     /** The code length of a DM soundex value. */
     private static final int MAX_LENGTH = 6;
@@ -224,7 +229,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
     private static final Map<Character, Character> FOLDINGS = new HashMap<>();
 
     static {
-        try (final Scanner scanner = new Scanner(Resources.getInputStream(RESOURCE_FILE), CharEncoding.UTF_8)) {
+        try (Scanner scanner = new Scanner(Resources.getInputStream(RESOURCE_FILE), CharEncoding.UTF_8)) {
             parseRules(scanner, RESOURCE_FILE, RULES, FOLDINGS);
         }
 
@@ -332,7 +337,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
     /**
      * Creates a new instance.
      * <p>
-     * With ASCII-folding enabled, certain accented characters will be transformed to equivalent ASCII characters, e.g.
+     * With ASCII-folding enabled, certain accented characters will be transformed to equivalent ASCII characters, for example
      * è -&gt; e.
      * </p>
      *
@@ -361,8 +366,9 @@ public class DaitchMokotoffSoundex implements StringEncoder {
             }
 
             ch = Character.toLowerCase(ch);
-            if (folding && FOLDINGS.containsKey(ch)) {
-                ch = FOLDINGS.get(ch);
+            final Character character = FOLDINGS.get(ch);
+            if (folding && character != null) {
+                ch = character;
             }
             sb.append(ch);
         }
@@ -373,17 +379,16 @@ public class DaitchMokotoffSoundex implements StringEncoder {
      * Encodes an Object using the Daitch-Mokotoff soundex algorithm without branching.
      * <p>
      * This method is provided in order to satisfy the requirements of the Encoder interface, and will throw an
-     * EncoderException if the supplied object is not of type java.lang.String.
+     * EncoderException if the supplied object is not of type {@link String}.
      * </p>
      *
      * @see #soundex(String)
-     *
      * @param obj
      *            Object to encode
-     * @return An object (of type java.lang.String) containing the DM soundex code, which corresponds to the String
+     * @return An object (of type {@link String}) containing the DM soundex code, which corresponds to the String
      *         supplied.
      * @throws EncoderException
-     *             if the parameter supplied is not of type java.lang.String
+     *             if the parameter supplied is not of type {@link String}
      * @throws IllegalArgumentException
      *             if a character is not mapped
      */
@@ -400,7 +405,6 @@ public class DaitchMokotoffSoundex implements StringEncoder {
      * Encodes a String using the Daitch-Mokotoff soundex algorithm without branching.
      *
      * @see #soundex(String)
-     *
      * @param source
      *            A String object to encode
      * @return A DM Soundex code corresponding to the String supplied
@@ -439,16 +443,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
      *             if a character is not mapped
      */
     public String soundex(final String source) {
-        final String[] branches = soundex(source, true);
-        final StringBuilder sb = new StringBuilder();
-        int index = 0;
-        for (final String branch : branches) {
-            sb.append(branch);
-            if (++index < branches.length) {
-                sb.append('|');
-            }
-        }
-        return sb.toString();
+        return String.join("|", soundex(source, true));
     }
 
     /**
@@ -471,7 +466,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
         final Set<Branch> currentBranches = new LinkedHashSet<>();
         currentBranches.add(new Branch());
 
-        char lastChar = '\0';
+        char lastChar = NUL;
         for (int index = 0; index < input.length(); index++) {
             final char ch = input.charAt(index);
 
@@ -503,7 +498,7 @@ public class DaitchMokotoffSoundex implements StringEncoder {
                             final Branch nextBranch = branchingRequired ? branch.createBranch() : branch;
 
                             // special rule: occurrences of mn or nm are treated differently
-                            final boolean force = (lastChar == 'm' && ch == 'n') || (lastChar == 'n' && ch == 'm');
+                            final boolean force = lastChar == 'm' && ch == 'n' || lastChar == 'n' && ch == 'm';
 
                             nextBranch.processNextReplacement(nextReplacement, force);
 

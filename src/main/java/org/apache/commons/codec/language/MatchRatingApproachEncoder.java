@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,10 +23,11 @@ import org.apache.commons.codec.StringEncoder;
 
 /**
  * Match Rating Approach Phonetic Algorithm Developed by <CITE>Western Airlines</CITE> in 1977.
- *
+ * <p>
  * This class is immutable and thread-safe.
+ * </p>
  *
- * @see <a href="http://en.wikipedia.org/wiki/Match_rating_approach">Wikipedia - Match Rating Approach</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Match_rating_approach">Wikipedia - Match Rating Approach</a>
  * @since 1.8
  */
 public class MatchRatingApproachEncoder implements StringEncoder {
@@ -62,6 +63,13 @@ public class MatchRatingApproachEncoder implements StringEncoder {
                    "TT", "VV", "WW", "XX", "YY", "ZZ" };
 
     /**
+     * Constructs a new instance.
+     */
+    public MatchRatingApproachEncoder() {
+        // empty
+    }
+
+    /**
      * Cleans up a name: 1. Upper-cases everything 2. Removes some common punctuation 3. Removes accents 4. Removes any
      * spaces.
      *
@@ -83,21 +91,19 @@ public class MatchRatingApproachEncoder implements StringEncoder {
         }
 
         upperName = removeAccents(upperName);
-        upperName = upperName.replaceAll("\\s+", EMPTY);
-
-        return upperName;
+        return upperName.replaceAll("\\s+", EMPTY);
     }
 
     /**
      * Encodes an Object using the Match Rating Approach algorithm. Method is here to satisfy the requirements of the
-     * Encoder interface Throws an EncoderException if input object is not of type java.lang.String.
+     * Encoder interface Throws an EncoderException if input object is not of type {@link String}.
      *
      * @param pObject
      *            Object to encode
-     * @return An object (or type java.lang.String) containing the Match Rating Approach code which corresponds to the
+     * @return An object (or type {@link String}) containing the Match Rating Approach code which corresponds to the
      *         String supplied.
      * @throws EncoderException
-     *             if the parameter supplied is not of type java.lang.String
+     *             if the parameter supplied is not of type {@link String}
      */
     @Override
     public final Object encode(final Object pObject) throws EncoderException {
@@ -125,17 +131,24 @@ public class MatchRatingApproachEncoder implements StringEncoder {
         // Preprocessing
         name = cleanName(name);
 
+        // Bulletproof if name becomes empty after cleanName(name)
+        if (SPACE.equals(name) || name.isEmpty()) {
+            return EMPTY;
+        }
+
         // BEGIN: Actual encoding part of the algorithm...
         // 1. Delete all vowels unless the vowel begins the word
         name = removeVowels(name);
 
+        // Bulletproof if name becomes empty after removeVowels(name)
+        if (SPACE.equals(name) || name.isEmpty()) {
+            return EMPTY;
+        }
+
         // 2. Remove second consonant from any double consonant
         name = removeDoubleConsonants(name);
 
-        // 3. Reduce codex to 6 letters by joining the first 3 and last 3 letters
-        name = getFirst3Last3(name);
-
-        return name;
+        return getFirst3Last3(name);
     }
 
     /**

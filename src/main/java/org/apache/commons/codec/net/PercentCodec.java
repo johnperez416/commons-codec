@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.apache.commons.codec.net;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+
 import org.apache.commons.codec.BinaryDecoder;
 import org.apache.commons.codec.BinaryEncoder;
 import org.apache.commons.codec.DecoderException;
@@ -41,7 +42,6 @@ public class PercentCodec implements BinaryEncoder, BinaryDecoder {
     /**
      * The escape character used by the Percent-Encoding in order to introduce an encoded character.
      */
-
     private static final byte ESCAPE_CHAR = '%';
 
     /**
@@ -82,52 +82,64 @@ public class PercentCodec implements BinaryEncoder, BinaryDecoder {
         insertAlwaysEncodeChars(alwaysEncodeChars);
     }
 
-    /**
-     * Adds the byte array into a BitSet for faster lookup
-     *
-     * @param alwaysEncodeCharsArray
-     */
-    private void insertAlwaysEncodeChars(final byte[] alwaysEncodeCharsArray) {
-        if (alwaysEncodeCharsArray != null) {
-            for (final byte b : alwaysEncodeCharsArray) {
-                insertAlwaysEncodeChar(b);
+    private boolean canEncode(final byte c) {
+        return !isAsciiChar(c) || inAlwaysEncodeCharsRange(c) && alwaysEncodeChars.get(c);
+    }
+
+    private boolean containsSpace(final byte[] bytes) {
+        for (final byte b : bytes) {
+            if (b == ' ') {
+                return true;
             }
         }
-        insertAlwaysEncodeChar(ESCAPE_CHAR);
+        return false;
     }
 
     /**
-     * Inserts a single character into a BitSet and maintains the min and max of the characters of the
-     * {@code BitSet alwaysEncodeChars} in order to avoid look-ups when a byte is out of this range.
-     *
-     * @param b the byte that is candidate for min and max limit
-     */
-    private void insertAlwaysEncodeChar(final byte b) {
-        this.alwaysEncodeChars.set(b);
-        if (b < alwaysEncodeCharsMin) {
-            alwaysEncodeCharsMin = b;
-        }
-        if (b > alwaysEncodeCharsMax) {
-            alwaysEncodeCharsMax = b;
-        }
-    }
-
-    /**
-     * Percent-Encoding based on RFC 3986. The non US-ASCII characters are encoded, as well as the
-     * US-ASCII characters that are configured to be always encoded.
+     * Decodes bytes encoded with Percent-Encoding based on RFC 3986. The reverse process is performed in order to
+     * decode the encoded characters to Unicode.
      */
     @Override
-    public byte[] encode(final byte[] bytes) throws EncoderException {
+    public byte[] decode(final byte[] bytes) throws DecoderException {
         if (bytes == null) {
             return null;
         }
-
-        final int expectedEncodingBytes = expectedEncodingBytes(bytes);
-        final boolean willEncode = expectedEncodingBytes != bytes.length;
-        if (willEncode || (plusForSpace && containsSpace(bytes))) {
-            return doEncode(bytes, expectedEncodingBytes, willEncode);
+        final ByteBuffer buffer = ByteBuffer.allocate(expectedDecodingBytes(bytes));
+        for (int i = 0; i < bytes.length; i++) {
+            final byte b = bytes[i];
+            if (b == ESCAPE_CHAR) {
+                try {
+                    final int u = Utils.digit16(bytes[++i]);
+                    final int l = Utils.digit16(bytes[++i]);
+                    buffer.put((byte) ((u << 4) + l));
+                } catch (final ArrayIndexOutOfBoundsException e) {
+                    throw new DecoderException("Invalid percent decoding: ", e);
+                }
+            } else if (plusForSpace && b == '+') {
+                buffer.put((byte) ' ');
+            } else {
+                buffer.put(b);
+            }
         }
-        return bytes;
+        return buffer.array();
+    }
+
+    /**
+     * Decodes a byte[] Object, whose bytes are encoded with Percent-Encoding.
+     *
+     * @param obj the object to decode
+     * @return the decoding result byte[] as Object
+     * @throws DecoderException if the object is not a byte array
+     */
+    @Override
+    public Object decode(final Object obj) throws DecoderException {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof byte[]) {
+            return decode((byte[]) obj);
+        }
+        throw new DecoderException("Objects of type " + obj.getClass().getName() + " cannot be Percent decoded");
     }
 
     private byte[] doEncode(final byte[] bytes, final int expectedLength, final boolean willEncode) {
@@ -152,73 +164,21 @@ public class PercentCodec implements BinaryEncoder, BinaryDecoder {
         return buffer.array();
     }
 
-    private int expectedEncodingBytes(final byte[] bytes) {
-        int byteCount = 0;
-        for (final byte b : bytes) {
-            byteCount += canEncode(b) ? 3: 1;
-        }
-        return byteCount;
-    }
-
-    private boolean containsSpace(final byte[] bytes) {
-        for (final byte b : bytes) {
-            if (b == ' ') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean canEncode(final byte c) {
-        return !isAsciiChar(c) || (inAlwaysEncodeCharsRange(c) && alwaysEncodeChars.get(c));
-    }
-
-    private boolean inAlwaysEncodeCharsRange(final byte c) {
-        return c >= alwaysEncodeCharsMin && c <= alwaysEncodeCharsMax;
-    }
-
-    private boolean isAsciiChar(final byte c) {
-        return c >= 0;
-    }
-
     /**
-     * Decode bytes encoded with Percent-Encoding based on RFC 3986. The reverse process is performed in order to
-     * decode the encoded characters to Unicode.
+     * Percent-Encoding based on RFC 3986. The non US-ASCII characters are encoded, as well as the
+     * US-ASCII characters that are configured to be always encoded.
      */
     @Override
-    public byte[] decode(final byte[] bytes) throws DecoderException {
+    public byte[] encode(final byte[] bytes) throws EncoderException {
         if (bytes == null) {
             return null;
         }
-
-        final ByteBuffer buffer = ByteBuffer.allocate(expectedDecodingBytes(bytes));
-        for (int i = 0; i < bytes.length; i++) {
-            final byte b = bytes[i];
-            if (b == ESCAPE_CHAR) {
-                try {
-                    final int u = Utils.digit16(bytes[++i]);
-                    final int l = Utils.digit16(bytes[++i]);
-                    buffer.put((byte) ((u << 4) + l));
-                } catch (final ArrayIndexOutOfBoundsException e) {
-                    throw new DecoderException("Invalid percent decoding: ", e);
-                }
-            } else if (plusForSpace && b == '+') {
-                buffer.put((byte) ' ');
-            } else {
-                buffer.put(b);
-            }
+        final int expectedEncodingBytes = expectedEncodingBytes(bytes);
+        final boolean willEncode = expectedEncodingBytes != bytes.length;
+        if (willEncode || plusForSpace && containsSpace(bytes)) {
+            return doEncode(bytes, expectedEncodingBytes, willEncode);
         }
-        return buffer.array();
-    }
-
-    private int expectedDecodingBytes(final byte[] bytes) {
-        int byteCount = 0;
-        for (int i = 0; i < bytes.length; ) {
-            final byte b = bytes[i];
-            i += b == ESCAPE_CHAR ? 3: 1;
-            byteCount++;
-        }
-        return byteCount;
+        return bytes;
     }
 
     /**
@@ -239,21 +199,62 @@ public class PercentCodec implements BinaryEncoder, BinaryDecoder {
         throw new EncoderException("Objects of type " + obj.getClass().getName() + " cannot be Percent encoded");
     }
 
+    private int expectedDecodingBytes(final byte[] bytes) {
+        int byteCount = 0;
+        for (int i = 0; i < bytes.length;) {
+            final byte b = bytes[i];
+            i += b == ESCAPE_CHAR ? 3 : 1;
+            byteCount++;
+        }
+        return byteCount;
+    }
+
+    private int expectedEncodingBytes(final byte[] bytes) {
+        int byteCount = 0;
+        for (final byte b : bytes) {
+            byteCount += canEncode(b) ? 3 : 1;
+        }
+        return byteCount;
+    }
+
+    private boolean inAlwaysEncodeCharsRange(final byte c) {
+        return c >= alwaysEncodeCharsMin && c <= alwaysEncodeCharsMax;
+    }
+
     /**
-     * Decodes a byte[] Object, whose bytes are encoded with Percent-Encoding.
+     * Inserts a single character into a BitSet and maintains the min and max of the characters of the
+     * {@code BitSet alwaysEncodeChars} in order to avoid look-ups when a byte is out of this range.
      *
-     * @param obj the object to decode
-     * @return the decoding result byte[] as Object
-     * @throws DecoderException if the object is not a byte array
+     * @param b the byte that is candidate for min and max limit
      */
-    @Override
-    public Object decode(final Object obj) throws DecoderException {
-        if (obj == null) {
-            return null;
+    private void insertAlwaysEncodeChar(final byte b) {
+        if (b < 0) {
+            throw new IllegalArgumentException("byte must be >= 0");
         }
-        if (obj instanceof byte[]) {
-            return decode((byte[]) obj);
+        this.alwaysEncodeChars.set(b);
+        if (b < alwaysEncodeCharsMin) {
+            alwaysEncodeCharsMin = b;
         }
-        throw new DecoderException("Objects of type " + obj.getClass().getName() + " cannot be Percent decoded");
+        if (b > alwaysEncodeCharsMax) {
+            alwaysEncodeCharsMax = b;
+        }
+    }
+
+    /**
+     * Inserts the byte array into a BitSet for faster lookup.
+     *
+     * @param alwaysEncodeCharsArray
+     */
+    private void insertAlwaysEncodeChars(final byte[] alwaysEncodeCharsArray) {
+        if (alwaysEncodeCharsArray != null) {
+            for (final byte b : alwaysEncodeCharsArray) {
+                insertAlwaysEncodeChar(b);
+            }
+        }
+        insertAlwaysEncodeChar(ESCAPE_CHAR);
+    }
+
+    private boolean isAsciiChar(final byte c) {
+        return c >= 0;
     }
 }

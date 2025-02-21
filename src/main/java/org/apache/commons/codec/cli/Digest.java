@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,14 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 /**
- * A minimal command line to run digest over files, directories or a string
+ * A minimal command line to run digest over files, directories or a string.
  *
  * @see #main(String[])
  * @since 1.11
@@ -58,21 +59,18 @@ public class Digest {
     private final String[] inputs;
 
     private Digest(final String[] args) {
-        if (args == null) {
-            throw new IllegalArgumentException("args");
-        }
+        Objects.requireNonNull(args);
         final int argsLength = args.length;
         if (argsLength == 0) {
             throw new IllegalArgumentException(
                     String.format("Usage: java %s [algorithm] [FILE|DIRECTORY|string] ...", Digest.class.getName()));
         }
         this.args = args;
-        algorithm = args[0];
+        this.algorithm = args[0];
         if (argsLength <= 1) {
-            inputs = null;
+            this.inputs = null;
         } else {
-            inputs = new String[argsLength - 1];
-            System.arraycopy(args, 1, inputs, 0, inputs.length);
+            this.inputs = Arrays.copyOfRange(args, 1, argsLength);
         }
     }
 
@@ -99,14 +97,6 @@ public class Digest {
             run("", messageDigest);
         } else {
             run("", DigestUtils.getDigest(algorithm.toUpperCase(Locale.ROOT)));
-        }
-    }
-
-    private void run(final String[] digestAlgorithms) throws IOException {
-        for (final String messageDigestAlgorithm : digestAlgorithms) {
-            if (DigestUtils.isAvailable(messageDigestAlgorithm)) {
-                run(messageDigestAlgorithm + " ", messageDigestAlgorithm);
-            }
         }
     }
 
@@ -142,6 +132,14 @@ public class Digest {
 
     private void run(final String prefix, final String messageDigestAlgorithm) throws IOException {
         run(prefix, DigestUtils.getDigest(messageDigestAlgorithm));
+    }
+
+    private void run(final String[] digestAlgorithms) throws IOException {
+        for (final String messageDigestAlgorithm : digestAlgorithms) {
+            if (DigestUtils.isAvailable(messageDigestAlgorithm)) {
+                run(messageDigestAlgorithm + " ", messageDigestAlgorithm);
+            }
+        }
     }
 
     @Override

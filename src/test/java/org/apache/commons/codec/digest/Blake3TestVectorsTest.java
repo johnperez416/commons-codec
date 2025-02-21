@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,17 @@
  */
 package org.apache.commons.codec.digest;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Tests the standard test vectors provided by the reference Blake3 implementation. Each test uses as input data the
@@ -266,6 +266,22 @@ public class Blake3TestVectorsTest {
     private byte[] keyedHashByteArray;
     private byte[] deriveKeyByteArray;
 
+    @ParameterizedTest
+    @MethodSource("data")
+    public void hashArbitraryOutputLength(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
+        initData(inputLength, hash, keyedHash, deriveKey);
+        final byte[] actual = hasher.update(inputByteArray).doFinalize(hashByteArray.length);
+        assertArrayEquals(hashByteArray, actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    public void hashTruncatedOutput(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
+        initData(inputLength, hash, keyedHash, deriveKey);
+        final byte[] actual = Blake3.hash(inputByteArray);
+        assertArrayEquals(Arrays.copyOf(this.hashByteArray, 32), actual);
+    }
+
     private void initData(final int inputLength, final String hash, final String keyedHash, final String deriveKey)
             throws DecoderException {
         this.inputByteArray = new byte[inputLength];
@@ -279,27 +295,20 @@ public class Blake3TestVectorsTest {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void hashArbitraryOutputLength(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
+    public void keyDerivation(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
         initData(inputLength, hash, keyedHash, deriveKey);
-        hasher.update(inputByteArray);
-        final byte[] actual = hasher.doFinalize(hashByteArray.length);
-        assertArrayEquals(hashByteArray, actual);
-    }
-
-    @ParameterizedTest
-    @MethodSource("data")
-    public void hashTruncatedOutput(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
-        initData(inputLength, hash, keyedHash, deriveKey);
-        final byte[] actual = Blake3.hash(inputByteArray);
-        assertArrayEquals(Arrays.copyOf(this.hashByteArray, 32), actual);
+        final byte[] actual = kdfHasher.update(inputByteArray).doFinalize(deriveKeyByteArray.length);
+        assertArrayEquals(deriveKeyByteArray, actual);
+        kdfHasher.reset().update(inputByteArray);
+        final byte[] truncated = kdfHasher.doFinalize(32);
+        assertArrayEquals(Arrays.copyOf(deriveKeyByteArray, 32), truncated);
     }
 
     @ParameterizedTest
     @MethodSource("data")
     public void keyedHashArbitraryOutputLength(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
         initData(inputLength, hash, keyedHash, deriveKey);
-        keyedHasher.update(inputByteArray);
-        final byte[] actual = keyedHasher.doFinalize(keyedHashByteArray.length);
+        final byte[] actual = keyedHasher.update(inputByteArray).doFinalize(keyedHashByteArray.length);
         assertArrayEquals(keyedHashByteArray, actual);
     }
 
@@ -309,18 +318,5 @@ public class Blake3TestVectorsTest {
         initData(inputLength, hash, keyedHash, deriveKey);
         final byte[] actual = Blake3.keyedHash(KEY, inputByteArray);
         assertArrayEquals(Arrays.copyOf(keyedHashByteArray, 32), actual);
-    }
-
-    @ParameterizedTest
-    @MethodSource("data")
-    public void keyDerivation(final int inputLength, final String hash, final String keyedHash, final String deriveKey) throws DecoderException {
-        initData(inputLength, hash, keyedHash, deriveKey);
-        kdfHasher.update(inputByteArray);
-        final byte[] actual = kdfHasher.doFinalize(deriveKeyByteArray.length);
-        assertArrayEquals(deriveKeyByteArray, actual);
-        kdfHasher.reset();
-        kdfHasher.update(inputByteArray);
-        final byte[] truncated = kdfHasher.doFinalize(32);
-        assertArrayEquals(Arrays.copyOf(deriveKeyByteArray, 32), truncated);
     }
 }

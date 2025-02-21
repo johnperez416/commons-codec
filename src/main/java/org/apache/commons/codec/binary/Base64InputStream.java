@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.io.InputStream;
 import org.apache.commons.codec.CodecPolicy;
 
 /**
- * Provides Base64 encoding and decoding in a streaming fashion (unlimited size). When encoding the default lineLength
+ * Provides Base64 decoding in a streaming fashion (unlimited size). When encoding the default lineLength
  * is 76 characters and the default lineEnding is CRLF, but these can be overridden by using the appropriate
  * constructor.
  * <p>
@@ -59,7 +59,7 @@ import org.apache.commons.codec.CodecPolicy;
 public class Base64InputStream extends BaseNCodecInputStream {
 
     /**
-     * Creates a Base64InputStream such that all data read is Base64-decoded from the original provided InputStream.
+     * Constructs a Base64InputStream such that all data read is Base64-decoded from the original provided InputStream.
      *
      * @param inputStream
      *            InputStream to wrap.
@@ -69,7 +69,7 @@ public class Base64InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
+     * Constructs a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
      * provided InputStream.
      *
      * @param inputStream
@@ -82,7 +82,7 @@ public class Base64InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
+     * Constructs a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
      * provided InputStream.
      *
      * @param inputStream
@@ -94,7 +94,7 @@ public class Base64InputStream extends BaseNCodecInputStream {
      *            the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
      *            doEncode is false, lineLength is ignored.
      * @param lineSeparator
-     *            If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
+     *            If doEncode is true, each line of encoded data will be terminated with this byte sequence (for example \r\n).
      *            If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
      */
     public Base64InputStream(final InputStream inputStream, final boolean doEncode, final int lineLength, final byte[] lineSeparator) {
@@ -102,7 +102,7 @@ public class Base64InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
+     * Constructs a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
      * provided InputStream.
      *
      * @param inputStream
@@ -114,7 +114,7 @@ public class Base64InputStream extends BaseNCodecInputStream {
      *            the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
      *            doEncode is false, lineLength is ignored.
      * @param lineSeparator
-     *            If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
+     *            If doEncode is true, each line of encoded data will be terminated with this byte sequence (for example \r\n).
      *            If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
      * @param decodingPolicy The decoding policy.
      * @since 1.15

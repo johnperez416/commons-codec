@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,19 +17,17 @@
 
 package org.apache.commons.codec.language;
 
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.StringEncoderAbstractTest;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.commons.codec.AbstractStringEncoderTest;
+import org.apache.commons.codec.EncoderException;
+import org.junit.jupiter.api.Test;
+
 /**
  * Tests Caverphone2.
- *
- * @since 1.5
  */
-public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
+public class Caverphone2Test extends AbstractStringEncoderTest<Caverphone2> {
 
     @Override
     protected Caverphone2 createStringEncoder() {
@@ -37,14 +35,14 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * AT11111111 words: add, aid, at, art, eat, earth, head, hit, hot, hold, hard, heart, it, out, old
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedCommonCodeAT11111111() throws EncoderException {
-        this.checkEncodingVariations("AT11111111", new String[]{
+        checkEncodingVariations("AT11111111", new String[]{
             "add",
             "aid",
             "at",
@@ -63,22 +61,22 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedExamples() throws EncoderException {
         final String[][] data = {{"Stevenson", "STFNSN1111"}, {"Peter", "PTA1111111"}};
-        this.checkEncodings(data);
+        checkEncodings(data);
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedRandomNameKLN1111111() throws EncoderException {
-        this.checkEncodingVariations("KLN1111111", new String[]{
+        checkEncodingVariations("KLN1111111", new String[]{
             "Cailean",
             "Calan",
             "Calen",
@@ -164,12 +162,12 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedRandomNameTN11111111() throws EncoderException {
-        this.checkEncodingVariations("TN11111111", new String[]{
+        checkEncodingVariations("TN11111111", new String[]{
             "Dan",
             "Dane",
             "Dann",
@@ -242,12 +240,12 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedRandomNameTTA1111111() throws EncoderException {
-        this.checkEncodingVariations("TTA1111111", new String[]{
+        checkEncodingVariations("TTA1111111", new String[]{
             "Darda",
             "Datha",
             "Dedie",
@@ -319,20 +317,20 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
     }
 
     /**
-     * See http://caversham.otago.ac.nz/files/working/ctp150804.pdf
+     * See https://caversham.otago.ac.nz/files/working/ctp150804.pdf
      *
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testCaverphoneRevisitedRandomWords() throws EncoderException {
-        this.checkEncodingVariations("RTA1111111", new String[]{"rather", "ready", "writer"});
-        this.checkEncoding("SSA1111111", "social");
-        this.checkEncodingVariations("APA1111111", new String[]{"able", "appear"});
+        checkEncodingVariations("RTA1111111", new String[]{"rather", "ready", "writer"});
+        checkEncoding("SSA1111111", "social");
+        checkEncodingVariations("APA1111111", new String[]{"able", "appear"});
     }
 
     @Test
     public void testEndMb() throws EncoderException {
         final String[][] data = {{"mb", "M111111111"}, {"mbmb", "MPM1111111"}};
-        this.checkEncodings(data);
+        checkEncodings(data);
     }
 
     // Caverphone Revisited
@@ -353,7 +351,7 @@ public class Caverphone2Test extends StringEncoderAbstractTest<Caverphone2> {
             {"Tedder", "TTA1111111"},
             {"Karleen", "KLN1111111"},
             {"Dyun", "TN11111111"}};
-        this.checkEncodings(data);
+        checkEncodings(data);
     }
 
 }

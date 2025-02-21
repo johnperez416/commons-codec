@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +71,7 @@ public class Md5Crypt {
      * {@link #apr1Crypt(byte[], Random)}.
      * </p>
      *
-     * @param keyBytes plaintext string to hash.
+     * @param keyBytes plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @return the hash value
      * @throws IllegalArgumentException when a {@link java.security.NoSuchAlgorithmException} is caught. *
      * @see #apr1Crypt(byte[], String)
@@ -86,9 +86,9 @@ public class Md5Crypt {
      * A salt is generated for you using the user provided {@link Random}.
      * </p>
      *
-     * @param keyBytes plaintext string to hash.
-     * @param random the instance of {@link Random} to use for generating the salt. Consider using {@link SecureRandom}
-     *            or {@link ThreadLocalRandom}.
+     * @param keyBytes plaintext string to hash. Each array element is set to {@code 0} before returning.
+     * @param random the instance of {@link Random} to use for generating the salt.
+     *              Consider using {@link SecureRandom} for more secure salts.
      * @return the hash value
      * @throws IllegalArgumentException when a {@link java.security.NoSuchAlgorithmException} is caught. *
      * @see #apr1Crypt(byte[], String)
@@ -105,11 +105,10 @@ public class Md5Crypt {
      * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            An APR1 salt. The salt may be null, in which case a salt is generated for you using
-     *            {@link ThreadLocalRandom}; for more secure salts consider using {@link SecureRandom} to generate your
-     *            own salts.
+     *            {@link SecureRandom}
      * @return the hash value
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -127,12 +126,11 @@ public class Md5Crypt {
     /**
      * See {@link #apr1Crypt(String, String)} for details.
      * <p>
-     * A salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     * {@link SecureRandom} to generate your own salts and calling {@link #apr1Crypt(byte[], String)}.
+     * A salt is generated for you using {@link SecureRandom}.
      * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @return the hash value
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
@@ -147,13 +145,13 @@ public class Md5Crypt {
      * <p>
      * The algorithm is identical to the crypt(3) "$1$" one but produces different outputs due to the different salt
      * prefix.
+     * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            salt string including the prefix and optionally garbage at the end. The salt may be null, in which
-     *            case a salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     *            {@link SecureRandom} to generate your own salts.
+     *            case a salt is generated for you using {@link SecureRandom}.
      * @return the hash value
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -168,13 +166,12 @@ public class Md5Crypt {
      * Generates a libc6 crypt() compatible "$1$" hash value.
      * <p>
      * See {@link #md5Crypt(byte[], String)} for details.
-     *</p>
+     * </p>
      * <p>
-     * A salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     * {@link SecureRandom} to generate your own salts and calling {@link #md5Crypt(byte[], String)}.
+     * A salt is generated for you using {@link SecureRandom}.
      * </p>
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @return the hash value
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
@@ -188,15 +185,15 @@ public class Md5Crypt {
      * Generates a libc6 crypt() compatible "$1$" hash value.
      * <p>
      * See {@link #md5Crypt(byte[], String)} for details.
-     *</p>
+     * </p>
      * <p>
      * A salt is generated for you using the instance of {@link Random} you supply.
      * </p>
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param random
-     *            the instance of {@link Random} to use for generating the salt. Consider using {@link SecureRandom}
-     *            or {@link ThreadLocalRandom}.
+     *            the instance of {@link Random} to use for generating the salt.
+     *            Consider using {@link SecureRandom} for more secure salts.
      * @return the hash value
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
@@ -215,11 +212,10 @@ public class Md5Crypt {
      * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            salt string including the prefix and optionally garbage at the end. The salt may be null, in which
-     *            case a salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     *            {@link SecureRandom} to generate your own salts.
+     *            case a salt is generated for you using {@link SecureRandom}.
      * @return the hash value
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -238,13 +234,12 @@ public class Md5Crypt {
      * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=". The salt may be null, in which case a salt
-     *            is generated for you using {@link ThreadLocalRandom}; for more secure salts consider
-     *            using {@link SecureRandom} to generate your own salts.
+     *            is generated for you using {@link SecureRandom}.
      * @param prefix
-     *            salt prefix
+     *            The salt prefix {@value #APR1_PREFIX}, {@value #MD5_PREFIX}.
      * @return the hash value
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -262,19 +257,18 @@ public class Md5Crypt {
      * </p>
      *
      * @param keyBytes
-     *            plaintext string to hash.
+     *            plaintext string to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=". The salt may be null, in which case a salt
-     *            is generated for you using {@link ThreadLocalRandom}; for more secure salts consider
-     *            using {@link SecureRandom} to generate your own salts.
+     *            is generated for you using {@link SecureRandom}.
      * @param prefix
-     *            salt prefix
+     *            The salt prefix {@value #APR1_PREFIX}, {@value #MD5_PREFIX}.
      * @param random
-     *            the instance of {@link Random} to use for generating the salt. Consider using {@link SecureRandom}
-     *            or {@link ThreadLocalRandom}.
+     *            the instance of {@link Random} to use for generating the salt.
+     *            Consider using {@link SecureRandom} for more secure salts.
      * @return the hash value
      * @throws IllegalArgumentException
-     *             if the salt does not match the allowed pattern
+     *             if the salt or prefix does not match the allowed pattern
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
      * @since 1.12
@@ -287,6 +281,13 @@ public class Md5Crypt {
         if (salt == null) {
             saltString = B64.getRandomSalt(8, random);
         } else {
+            Objects.requireNonNull(prefix, "prefix");
+            if (prefix.length() < 3) {
+                throw new IllegalArgumentException("Invalid prefix value: " + prefix);
+            }
+            if (prefix.charAt(0) != '$' && prefix.charAt(prefix.length() - 1) != '$') {
+                throw new IllegalArgumentException("Invalid prefix value: " + prefix);
+            }
             final Pattern p = Pattern.compile("^" + prefix.replace("$", "\\$") + "([\\.\\/a-zA-Z0-9]{1,8}).*");
             final Matcher m = p.matcher(salt);
             if (!m.find()) {
@@ -328,7 +329,7 @@ public class Md5Crypt {
         }
 
         /*
-         * Don't leave anything around in vm they could use.
+         * Don't leave anything around in JVM they could use.
          */
         Arrays.fill(finalb, (byte) 0);
 
@@ -391,7 +392,7 @@ public class Md5Crypt {
         B64.b64from24bit((byte) 0, (byte) 0, finalb[11], 2, passwd);
 
         /*
-         * Don't leave anything around in vm they could use.
+         * Don't leave anything around in JVM they could use.
          */
         // Is there a better way to do this with the JVM?
         ctx.reset();
@@ -401,5 +402,15 @@ public class Md5Crypt {
         Arrays.fill(finalb, (byte) 0);
 
         return passwd.toString();
+    }
+
+    /**
+     * TODO Make private in 2.0.
+     *
+     * @deprecated TODO Make private in 2.0.
+     */
+    @Deprecated
+    public Md5Crypt() {
+        // empty
     }
 }

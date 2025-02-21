@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,11 +30,14 @@ import java.util.regex.Pattern;
  * <p>
  * Based on the C implementation released into the Public Domain by Ulrich Drepper &lt;drepper@redhat.com&gt;
  * http://www.akkadia.org/drepper/SHA-crypt.txt
+ * </p>
  * <p>
  * Conversion to Kotlin and from there to Java in 2012 by Christian Hammers &lt;ch@lathspell.de&gt; and likewise put
  * into the Public Domain.
+ * </p>
  * <p>
  * This class is immutable and thread-safe.
+ * </p>
  *
  * @since 1.7
  */
@@ -75,12 +77,11 @@ public class Sha2Crypt {
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * <p>
-     * A salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     * {@link SecureRandom} to generate your own salts and calling {@link #sha256Crypt(byte[], String)}.
+     * A salt is generated for you using {@link SecureRandom}.
      * </p>
      *
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @return complete hash value
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
@@ -95,7 +96,7 @@ public class Sha2Crypt {
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=". The salt may be null, in which case a salt
      *            is generated for you using {@link SecureRandom}. If one does not want to use {@link SecureRandom},
@@ -119,12 +120,12 @@ public class Sha2Crypt {
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=".
      * @param random
-     *            the instance of {@link Random} to use for generating the salt. Consider using {@link SecureRandom}
-     *            or {@link ThreadLocalRandom}.
+     *            the instance of {@link Random} to use for generating the salt.
+     *            Consider using {@link SecureRandom} for more secure salts.
      * @return complete hash value including salt
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -144,11 +145,13 @@ public class Sha2Crypt {
      * <p>
      * This is a nearly line by line conversion of the original C function. The numbered comments are from the algorithm
      * description, the short C-style ones from the original C code and the ones with "Remark" from me.
+     * </p>
      * <p>
      * See {@link Crypt#crypt(String, String)} for details.
+     * </p>
      *
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds="; may not be null
      * @param saltPrefix
@@ -546,12 +549,11 @@ public class Sha2Crypt {
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * <p>
-     * A salt is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     * {@link SecureRandom} to generate your own salts and calling {@link #sha512Crypt(byte[], String)}.
+     * A salt is generated for you using {@link SecureRandom}
      * </p>
      *
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @return complete hash value
      * @throws IllegalArgumentException
      *             when a {@link java.security.NoSuchAlgorithmException} is caught.
@@ -566,7 +568,7 @@ public class Sha2Crypt {
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=". The salt may be null, in which case a salt is generated
      *            for you using {@link SecureRandom}; if you want to use a {@link Random} object other than
@@ -585,22 +587,19 @@ public class Sha2Crypt {
         return sha2Crypt(keyBytes, salt, SHA512_PREFIX, SHA512_BLOCKSIZE, MessageDigestAlgorithms.SHA_512);
     }
 
-
-
     /**
      * Generates a libc6 crypt() compatible "$6$" hash value.
      * <p>
      * See {@link Crypt#crypt(String, String)} for details.
      * </p>
      * @param keyBytes
-     *            plaintext to hash
+     *            plaintext to hash. Each array element is set to {@code 0} before returning.
      * @param salt
      *            real salt value without prefix or "rounds=". The salt may be null, in which case a salt
-     *            is generated for you using {@link ThreadLocalRandom}; for more secure salts consider using
-     *            {@link SecureRandom} to generate your own salts.
+     *            is generated for you using {@link SecureRandom}.
      * @param random
-     *            the instance of {@link Random} to use for generating the salt. Consider using {@link SecureRandom}
-     *            or {@link ThreadLocalRandom}.
+     *            the instance of {@link Random} to use for generating the salt.
+     *            Consider using {@link SecureRandom} for more secure salts.
      * @return complete hash value including salt
      * @throws IllegalArgumentException
      *             if the salt does not match the allowed pattern
@@ -613,5 +612,15 @@ public class Sha2Crypt {
             salt = SHA512_PREFIX + B64.getRandomSalt(8, random);
         }
         return sha2Crypt(keyBytes, salt, SHA512_PREFIX, SHA512_BLOCKSIZE, MessageDigestAlgorithms.SHA_512);
+    }
+
+    /**
+     * Consider private.
+     *
+     * @deprecated Will be private in the next major version.
+     */
+    @Deprecated
+    public Sha2Crypt() {
+        // empty
     }
 }

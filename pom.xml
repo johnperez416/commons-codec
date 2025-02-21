@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -19,21 +19,21 @@ limitations under the License.
  To produce reports, use the reporting profile, for example: mvn -Preporting clean site
  You may need to use the -U option to update your environment if you get an error.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-parent</artifactId>
-    <version>54</version>
+    <version>81</version>
   </parent>
   <groupId>commons-codec</groupId>
   <artifactId>commons-codec</artifactId>
-  <version>1.16-SNAPSHOT</version>
+  <version>1.18.1-SNAPSHOT</version>
   <name>Apache Commons Codec</name>
   <inceptionYear>2002</inceptionYear>
   <description>
-     The Apache Commons Codec package contains simple encoder and decoders for
-     various formats such as Base64 and Hexadecimal.  In addition to these
+     The Apache Commons Codec component contains encoders and decoders for
+     formats such as Base16, Base32, Base64, digest, and Hexadecimal. In addition to these
      widely used encoders and decoders, the codec package also maintains a
      collection of phonetic encoding utilities.
   </description>
@@ -50,11 +50,265 @@ limitations under the License.
   </scm>
   <distributionManagement>
     <site>
-      <id>stagingSite</id>
-      <name>Apache Staging Website</name>
-      <url>${commons.deployment.protocol}://people.apache.org/www/commons.apache.org/commons-${commons.componentid}/</url>
+      <id>apache.website</id>
+      <name>Apache Commons Site</name>
+      <url>scm:svn:https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-codec/</url>
     </site>
   </distributionManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.17.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.18.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <commons.componentid>codec</commons.componentid>
+    <commons.module.name>org.apache.commons.codec</commons.module.name>
+    <commons.jira.id>CODEC</commons.jira.id>
+    <commons.jira.pid>12310464</commons.jira.pid>
+    <!-- Ensure copies work OK (can be removed later when this is in parent POM) -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <commons.encoding>UTF-8</commons.encoding>
+    <checkstyle.header.file>${basedir}/src/conf/checkstyle-header.txt</checkstyle.header.file>
+    <checkstyle.config.file>${basedir}/src/conf/checkstyle.xml</checkstyle.config.file>
+    <!-- Commons Release Plugin -->
+    <commons.release.version>1.18.0</commons.release.version>
+    <commons.bc.version>1.17.1</commons.bc.version>
+    <commons.release.next>1.18.1</commons.release.next>
+    <commons.rc.version>RC1</commons.rc.version>
+    <commons.release.isDistModule>true</commons.release.isDistModule>
+    <commons.distSvnStagingUrl>scm:svn:https://dist.apache.org/repos/dist/dev/commons/${commons.componentid}</commons.distSvnStagingUrl>
+    <!-- project.build.outputTimestamp is managed by Maven plugins, see https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+    <project.build.outputTimestamp>2025-01-27T18:05:48Z</project.build.outputTimestamp>
+    <commons.jacoco.version>0.8.12</commons.jacoco.version>
+    <!-- Temp for SUREFIRE-2253 -->
+    <commons.surefire.version>3.2.5</commons.surefire.version>
+    <!-- JaCoCo: Don't make code coverage worse than: -->
+    <jacoco.skip>false</jacoco.skip>
+    <commons.jacoco.haltOnFailure>true</commons.jacoco.haltOnFailure>
+    <commons.jacoco.classRatio>0.92</commons.jacoco.classRatio>
+    <commons.jacoco.instructionRatio>0.91</commons.jacoco.instructionRatio>
+    <commons.jacoco.methodRatio>0.87</commons.jacoco.methodRatio>
+    <commons.jacoco.branchRatio>0.86</commons.jacoco.branchRatio>
+    <commons.jacoco.lineRatio>0.89</commons.jacoco.lineRatio>
+    <commons.jacoco.complexityRatio>0.84</commons.jacoco.complexityRatio>
+  </properties>
+  <build>
+    <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check javadoc:javadoc</defaultGoal>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-scm-publish-plugin</artifactId>
+          <version>${commons.scm-publish.version}</version>
+          <configuration>
+            <ignorePathsToDelete>
+              <ignorePathToDelete>archive**</ignorePathToDelete>
+            </ignorePathsToDelete>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <configuration>
+            <configLocation>${checkstyle.config.file}</configLocation>
+            <enableRulesSummary>false</enableRulesSummary>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            <resourceExcludes>NOTICE.txt,LICENSE.txt,**/pom.properties,**/sha512.properties</resourceExcludes>
+          </configuration>
+        </plugin>        
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>src/test/resources/org/apache/commons/codec/bla.tar</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/bla.tar.xz</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/empty.bin</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/small.bin</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <!-- Add Java 9 Automatic-Module-Name -->
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive combine.children="append">
+            <!-- Temporary fix, remove this after this has implemented in parent pom -->
+            <manifestEntries>
+              <Automatic-Module-Name>${commons.module.name}</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*AbstractTest.java</exclude>
+            <exclude>**/*PerformanceTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/assembly/bin.xml</descriptor>
+            <descriptor>src/assembly/src.xml</descriptor>
+          </descriptors>
+          <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
+      <!-- Allow use of mvn checkstyle:checkstyle. Must agree with reporting section below. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <!-- Specify source for JDK 11+ javadoc tool to ignore the 'unnamed' module.
+           See: https://bugs.openjdk.java.net/browse/JDK-8212233.
+           To be removed with parent 49. -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <version>1.24</version>
+        <configuration>
+          <ignores>
+            <!-- JDK9 breaks compatibility by returning ByteBuffer not Buffer -->
+            <ignore>java.nio.ByteBuffer</ignore>
+          </ignores>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>src/test/resources/org/apache/commons/codec/bla.tar</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/bla.tar.xz</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/empty.bin</exclude>
+            <exclude>src/test/resources/org/apache/commons/codec/small.bin</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <!-- We need to specify reportSets because 2.9.1 creates two reports -->
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${commons.pmd.version}</version>
+        <configuration>
+          <targetJdk>${maven.compiler.target}</targetJdk>
+          <linkXref>true</linkXref>
+          <rulesets>
+            <ruleset>${basedir}/src/conf/pmd.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+        <configuration>
+          <tags>
+            <tag>TODO</tag>
+            <tag>NOPMD</tag>
+            <tag>NOTE</tag>
+          </tags>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javancss-maven-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+    </plugins>
+  </reporting>
+  <profiles>
+    <profile>
+	  <!-- Java 8 only -->
+      <id>java-8</id>
+      <activation>
+		<jdk>8</jdk>
+	  </activation>
+      <properties>
+        <!-- JaCoCo: Don't make code coverage worse than: -->
+        <commons.jacoco.haltOnFailure>true</commons.jacoco.haltOnFailure>
+        <commons.jacoco.classRatio>0.96</commons.jacoco.classRatio>
+        <commons.jacoco.instructionRatio>0.97</commons.jacoco.instructionRatio>
+        <commons.jacoco.methodRatio>0.88</commons.jacoco.methodRatio>
+        <commons.jacoco.branchRatio>0.92</commons.jacoco.branchRatio>
+        <commons.jacoco.complexityRatio>0.88</commons.jacoco.complexityRatio>
+        <commons.jacoco.lineRatio>0.94</commons.jacoco.lineRatio>    
+      </properties>
+    </profile>
+    <profile>
+	  <!-- Java 9 and up -->
+      <id>java-9-up</id>
+      <activation>
+		<jdk>[9,)</jdk>
+	  </activation>
+      <properties>
+        <!-- JaCoCo: Don't make code coverage worse than: -->
+        <commons.jacoco.haltOnFailure>true</commons.jacoco.haltOnFailure>
+        <commons.jacoco.classRatio>0.96</commons.jacoco.classRatio>
+        <commons.jacoco.instructionRatio>0.97</commons.jacoco.instructionRatio>
+        <commons.jacoco.methodRatio>0.93</commons.jacoco.methodRatio>
+        <commons.jacoco.branchRatio>0.92</commons.jacoco.branchRatio>
+        <commons.jacoco.complexityRatio>0.90</commons.jacoco.complexityRatio>
+        <commons.jacoco.lineRatio>0.95</commons.jacoco.lineRatio>    
+      </properties>
+    </profile>
+  </profiles>
   <developers>
     <developer>
       <name>Henri Yandell</name>
@@ -93,7 +347,7 @@ limitations under the License.
       <email>ggregory at apache.org</email>
       <url>https://www.garygregory.com</url>
       <organization>The Apache Software Foundation</organization>
-      <organizationUrl>https://www.apache.org/</organizationUrl>      
+      <organizationUrl>https://www.apache.org/</organizationUrl>
       <roles>
         <role>PMC Member</role>
       </roles>
@@ -228,264 +482,4 @@ limitations under the License.
       </roles>
     </contributor>
   </contributors>
-  <!-- Codec only has test dependencies ATM -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>5.9.1</version>
-        <type>pom</type>
-        <scope>import</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <commons.componentid>codec</commons.componentid>
-    <commons.module.name>org.apache.commons.codec</commons.module.name>
-    <commons.jira.id>CODEC</commons.jira.id>
-    <commons.jira.pid>12310464</commons.jira.pid>
-    <!-- Ensure copies work OK (can be removed later when this is in parent POM) -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <commons.encoding>UTF-8</commons.encoding>
-    <checkstyle.header.file>${basedir}/src/conf/checkstyle-header.txt</checkstyle.header.file>
-    <checkstyle.config.file>${basedir}/src/conf/checkstyle.xml</checkstyle.config.file>
-    <commons.checkstyle-plugin.version>3.2.0</commons.checkstyle-plugin.version>
-    <commons.checkstyle.version>9.3</commons.checkstyle.version>
-    <commons.japicmp.version>0.16.0</commons.japicmp.version>
-    <commons.jacoco.version>0.8.8</commons.jacoco.version>
-    <commons.javadoc.version>3.4.1</commons.javadoc.version>
-    <commons.surefire-report.version>3.0.0-M7</commons.surefire-report.version>
-    <commons.animal-sniffer.version>1.22</commons.animal-sniffer.version>
-    <commons.pmd.version>3.19.0</commons.pmd.version>
-    <commons.pmd-impl.version>6.47.0</commons.pmd-impl.version>
-    <japicmp.skip>false</japicmp.skip>
-    <jacoco.skip>false</jacoco.skip>
-
-    <!-- Commons Release Plugin -->
-    <commons.bc.version>1.15</commons.bc.version>
-    <commons.rc.version>RC1</commons.rc.version>
-    <commons.release-plugin.version>1.7</commons.release-plugin.version>
-    <commons.release.isDistModule>true</commons.release.isDistModule>
-    <commons.distSvnStagingUrl>scm:svn:https://dist.apache.org/repos/dist/dev/commons/${commons.componentid}</commons.distSvnStagingUrl>
-    <commons.releaseManagerName>Matt Sicker</commons.releaseManagerName>
-    <commons.releaseManagerKey>748F15B2CF9BA8F024155E6ED7C92B70FA1C814D</commons.releaseManagerKey>
-  </properties>
-  <build>
-    <defaultGoal>clean install apache-rat:check japicmp:cmp checkstyle:check javadoc:javadoc</defaultGoal>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-scm-publish-plugin</artifactId>
-          <version>${commons.scm-publish.version}</version>
-          <configuration>
-            <ignorePathsToDelete>
-              <ignorePathToDelete>archive**</ignorePathToDelete>
-            </ignorePathsToDelete>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${commons.checkstyle-plugin.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>com.puppycrawl.tools</groupId>
-              <artifactId>checkstyle</artifactId>
-              <version>${commons.checkstyle.version}</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <configLocation>${checkstyle.config.file}</configLocation>
-            <enableRulesSummary>false</enableRulesSummary>
-            <headerFile>${checkstyle.header.file}</headerFile>
-            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-            <resourceExcludes>NOTICE.txt,LICENSE.txt,**/pom.properties,**/sha512.properties</resourceExcludes>
-          </configuration>
-        </plugin>        
-      </plugins>
-    </pluginManagement>
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>src/test/resources/org/apache/commons/codec/bla.tar</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/bla.tar.xz</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/empty.bin</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/small.bin</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-
-      <!-- Add Java 9 Automatic-Module-Name -->
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive combine.children="append">
-            <!-- Temporary fix, remove this after this has implemented in parent pom -->
-            <manifestEntries>
-              <Automatic-Module-Name>${commons.module.name}</Automatic-Module-Name>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${commons.surefire-report.version}</version>
-        <configuration>
-          <excludes>
-            <exclude>**/*AbstractTest.java</exclude>
-            <exclude>**/*PerformanceTest.java</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/assembly/bin.xml</descriptor>
-            <descriptor>src/assembly/src.xml</descriptor>
-          </descriptors>
-          <tarLongFileMode>gnu</tarLongFileMode>
-        </configuration>
-      </plugin>
-      <!-- Allow use of mvn checkstyle:checkstyle. Must agree with reporting section below. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <!-- Specify source for JDK 11+ javadoc tool to ignore the 'unnamed' module.
-           See: https://bugs.openjdk.java.net/browse/JDK-8212233.
-           To be removed with parent 49. -->
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <source>${maven.compiler.source}</source>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <configuration>
-          <ignores>
-            <!-- JDK9 breaks compatibility by returning ByteBuffer not Buffer -->
-            <ignore>java.nio.ByteBuffer</ignore>
-          </ignores>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>src/test/resources/org/apache/commons/codec/bla.tar</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/bla.tar.xz</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/empty.bin</exclude>
-            <exclude>src/test/resources/org/apache/commons/codec/small.bin</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <!-- We need to specify reportSets because 2.9.1 creates two reports -->
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>checkstyle</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>${commons.pmd.version}</version>
-        <configuration>
-          <targetJdk>${maven.compiler.target}</targetJdk>
-          <linkXref>true</linkXref>
-          <rulesets>
-            <ruleset>${basedir}/src/conf/pmd.xml</ruleset>
-          </rulesets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-maven-plugin</artifactId>
-	    <version>${commons.spotbugs.plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>taglist-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <tags>
-            <tag>TODO</tag>
-            <tag>NOPMD</tag>
-            <tag>NOTE</tag>
-          </tags>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>javancss-maven-plugin</artifactId>
-        <version>2.1</version>
-      </plugin>
-    </plugins>
-  </reporting>
-  <profiles>
-    <profile>
-      <id>java9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <properties>
-        <!-- coverall version 4.3.0 does not work with java 9, see https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
-        <coveralls.skip>true</coveralls.skip>
-      </properties>
-    </profile>
-  </profiles>
 </project>

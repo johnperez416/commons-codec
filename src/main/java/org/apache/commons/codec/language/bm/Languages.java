@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,23 +33,27 @@ import org.apache.commons.codec.Resources;
  * <p>
  * Language codes are typically loaded from resource files. These are UTF-8
  * encoded text files. They are systematically named following the pattern:
+ * </p>
  * <blockquote>org/apache/commons/codec/language/bm/${{@link NameType#getName()}
  * languages.txt</blockquote>
  * <p>
  * The format of these resources is the following:
+ * </p>
  * <ul>
- * <li><b>Language:</b> a single string containing no whitespace</li>
- * <li><b>End-of-line comments:</b> Any occurrence of '//' will cause all text
+ * <li><strong>Language:</strong> a single string containing no whitespace</li>
+ * <li><strong>End-of-line comments:</strong> Any occurrence of '//' will cause all text
  * following on that line to be discarded as a comment.</li>
- * <li><b>Multi-line comments:</b> Any line starting with '/*' will start
+ * <li><strong>Multi-line comments:</strong> Any line starting with '/*' will start
  * multi-line commenting mode. This will skip all content until a line ending in
  * '*' and '/' is found.</li>
- * <li><b>Blank lines:</b> All blank lines will be skipped.</li>
+ * <li><strong>Blank lines:</strong> All blank lines will be skipped.</li>
  * </ul>
  * <p>
  * Ported from language.php
+ * </p>
  * <p>
  * This class is immutable and thread-safe.
+ * </p>
  *
  * @since 1.6
  */
@@ -64,23 +68,63 @@ public class Languages {
     /**
      * A set of languages.
      */
-    public static abstract class LanguageSet {
+    public abstract static class LanguageSet {
 
-        public static LanguageSet from(final Set<String> langs) {
-            return langs.isEmpty() ? NO_LANGUAGES : new SomeLanguages(langs);
+        /**
+         * Gets a language set for the given languages.
+         *
+         * @param languages a language set.
+         * @return a LanguageSet.
+         */
+        public static LanguageSet from(final Set<String> languages) {
+            return languages.isEmpty() ? NO_LANGUAGES : new SomeLanguages(languages);
         }
 
+        /**
+         * Constructs a new instance for subclasses.
+         */
+        public LanguageSet() {
+            // empty
+        }
+
+        /**
+         * Tests whether this instance contains the given value.
+         *
+         * @param language the value to test.
+         * @return whether this instance contains the given value.
+         */
         public abstract boolean contains(String language);
 
+        /**
+         * Gets any of this instance's element.
+         *
+         * @return any of this instance's element.
+         */
         public abstract String getAny();
 
+        /**
+         * Tests whether this instance is empty.
+         *
+         * @return whether this instance is empty.
+         */
         public abstract boolean isEmpty();
 
+        /**
+         * Tests whether this instance contains a single element.
+         *
+         * @return whether this instance contains a single element.
+         */
         public abstract boolean isSingleton();
 
-        public abstract LanguageSet restrictTo(LanguageSet other);
-
         abstract LanguageSet merge(LanguageSet other);
+
+        /**
+         * Returns an instance restricted to this instances and the given values'.
+         *
+         * @param other The other instance.
+         * @return an instance restricted to this instances and the given values'.
+         */
+        public abstract LanguageSet restrictTo(LanguageSet other);
     }
 
     /**
@@ -103,6 +147,11 @@ public class Languages {
             return this.languages.iterator().next();
         }
 
+        /**
+         * Gets the language strings
+         *
+         * @return the languages strings.
+         */
         public Set<String> getLanguages() {
             return this.languages;
         }
@@ -115,18 +164,6 @@ public class Languages {
         @Override
         public boolean isSingleton() {
             return this.languages.size() == 1;
-        }
-
-        @Override
-        public LanguageSet restrictTo(final LanguageSet other) {
-            if (other == NO_LANGUAGES) {
-                return other;
-            }
-            if (other == ANY_LANGUAGE) {
-                return this;
-            }
-            final SomeLanguages someLanguages = (SomeLanguages) other;
-            return from(languages.stream().filter(lang -> someLanguages.languages.contains(lang)).collect(Collectors.toSet()));
         }
 
         @Override
@@ -144,58 +181,36 @@ public class Languages {
         }
 
         @Override
+        public LanguageSet restrictTo(final LanguageSet other) {
+            if (other == NO_LANGUAGES) {
+                return other;
+            }
+            if (other == ANY_LANGUAGE) {
+                return this;
+            }
+            final SomeLanguages someLanguages = (SomeLanguages) other;
+            return from(languages.stream().filter(lang -> someLanguages.languages.contains(lang)).collect(Collectors.toSet()));
+        }
+
+        @Override
         public String toString() {
             return "Languages(" + languages.toString() + ")";
         }
 
     }
 
+    /**
+     * Marker for any language.
+     */
     public static final String ANY = "any";
 
     private static final Map<NameType, Languages> LANGUAGES = new EnumMap<>(NameType.class);
-
-    static {
-        for (final NameType s : NameType.values()) {
-            LANGUAGES.put(s, getInstance(langResourceName(s)));
-        }
-    }
-
-    public static Languages getInstance(final NameType nameType) {
-        return LANGUAGES.get(nameType);
-    }
-
-    public static Languages getInstance(final String languagesResourceName) {
-        // read languages list
-        final Set<String> ls = new HashSet<>();
-        try (final Scanner lsScanner = new Scanner(Resources.getInputStream(languagesResourceName),
-                ResourceConstants.ENCODING)) {
-            boolean inExtendedComment = false;
-            while (lsScanner.hasNextLine()) {
-                final String line = lsScanner.nextLine().trim();
-                if (inExtendedComment) {
-                    if (line.endsWith(ResourceConstants.EXT_CMT_END)) {
-                        inExtendedComment = false;
-                    }
-                } else if (line.startsWith(ResourceConstants.EXT_CMT_START)) {
-                    inExtendedComment = true;
-                } else if (!line.isEmpty()) {
-                    ls.add(line);
-                }
-            }
-            return new Languages(Collections.unmodifiableSet(ls));
-        }
-    }
-
-    private static String langResourceName(final NameType nameType) {
-        return String.format("org/apache/commons/codec/language/bm/%s_languages.txt", nameType.getName());
-    }
-
-    private final Set<String> languages;
 
     /**
      * No languages at all.
      */
     public static final LanguageSet NO_LANGUAGES = new LanguageSet() {
+
         @Override
         public boolean contains(final String language) {
             return false;
@@ -217,13 +232,13 @@ public class Languages {
         }
 
         @Override
-        public LanguageSet restrictTo(final LanguageSet other) {
-            return this;
+        public LanguageSet merge(final LanguageSet other) {
+            return other;
         }
 
         @Override
-        public LanguageSet merge(final LanguageSet other) {
-            return other;
+        public LanguageSet restrictTo(final LanguageSet other) {
+            return this;
         }
 
         @Override
@@ -236,6 +251,7 @@ public class Languages {
      * Any/all languages.
      */
     public static final LanguageSet ANY_LANGUAGE = new LanguageSet() {
+
         @Override
         public boolean contains(final String language) {
             return true;
@@ -257,12 +273,12 @@ public class Languages {
         }
 
         @Override
-        public LanguageSet restrictTo(final LanguageSet other) {
+        public LanguageSet merge(final LanguageSet other) {
             return other;
         }
 
         @Override
-        public LanguageSet merge(final LanguageSet other) {
+        public LanguageSet restrictTo(final LanguageSet other) {
             return other;
         }
 
@@ -272,10 +288,65 @@ public class Languages {
         }
     };
 
+    static {
+        for (final NameType s : NameType.values()) {
+            LANGUAGES.put(s, getInstance(langResourceName(s)));
+        }
+    }
+
+    /**
+     * Gets an instance for the given name type.
+     *
+     * @param nameType The name type to lookup.
+     * @return an instance for the given name type.
+     */
+    public static Languages getInstance(final NameType nameType) {
+        return LANGUAGES.get(nameType);
+    }
+
+    /**
+     * Gets a new instance for the given resource name.
+     *
+     * @param languagesResourceName the resource name to lookup.
+     * @return a new instance.
+     */
+    public static Languages getInstance(final String languagesResourceName) {
+        // read languages list
+        final Set<String> ls = new HashSet<>();
+        try (Scanner lsScanner = new Scanner(Resources.getInputStream(languagesResourceName),
+                ResourceConstants.ENCODING)) {
+            boolean inExtendedComment = false;
+            while (lsScanner.hasNextLine()) {
+                final String line = lsScanner.nextLine().trim();
+                if (inExtendedComment) {
+                    if (line.endsWith(ResourceConstants.EXT_CMT_END)) {
+                        inExtendedComment = false;
+                    }
+                } else if (line.startsWith(ResourceConstants.EXT_CMT_START)) {
+                    inExtendedComment = true;
+                } else if (!line.isEmpty()) {
+                    ls.add(line);
+                }
+            }
+            return new Languages(Collections.unmodifiableSet(ls));
+        }
+    }
+
+    private static String langResourceName(final NameType nameType) {
+        return String.format("/org/apache/commons/codec/language/bm/%s_languages.txt", nameType.getName());
+    }
+
+    private final Set<String> languages;
+
     private Languages(final Set<String> languages) {
         this.languages = languages;
     }
 
+    /**
+     * Gets the language set.
+     *
+     * @return the language set.
+     */
     public Set<String> getLanguages() {
         return this.languages;
     }

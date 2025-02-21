@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,13 @@
 
 package org.apache.commons.codec;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Character encoding names required of every implementation of the Java platform.
  *
- * From the Java documentation <a
- * href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>:
+ * From the Java documentation for {@link Charset}:
  * <p>
  * <cite>Every implementation of the Java platform is required to support the following character encodings. Consult the
  * release documentation for your implementation to see if any other encodings are supported. Consult the release
@@ -51,7 +53,7 @@ package org.apache.commons.codec;
  * This class is immutable and thread-safe.
  * </p>
  *
- * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+ * @see Charset
  * @since 1.4
  */
 public class CharEncoding {
@@ -62,9 +64,9 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String ISO_8859_1 = "ISO-8859-1";
+    public static final String ISO_8859_1 = StandardCharsets.ISO_8859_1.name();
 
     /**
      * Seven-bit ASCII, also known as ISO646-US, also known as the Basic Latin block of the Unicode character set.
@@ -72,9 +74,9 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String US_ASCII = "US-ASCII";
+    public static final String US_ASCII = StandardCharsets.US_ASCII.name();
 
     /**
      * Sixteen-bit Unicode Transformation Format, The byte order specified by a mandatory initial byte-order mark
@@ -83,9 +85,9 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String UTF_16 = "UTF-16";
+    public static final String UTF_16 = StandardCharsets.UTF_16.name();
 
     /**
      * Sixteen-bit Unicode Transformation Format, big-endian byte order.
@@ -93,9 +95,9 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String UTF_16BE = "UTF-16BE";
+    public static final String UTF_16BE = StandardCharsets.UTF_16BE.name();
 
     /**
      * Sixteen-bit Unicode Transformation Format, little-endian byte order.
@@ -103,9 +105,9 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String UTF_16LE = "UTF-16LE";
+    public static final String UTF_16LE = StandardCharsets.UTF_16LE.name();
 
     /**
      * Eight-bit Unicode Transformation Format.
@@ -113,7 +115,18 @@ public class CharEncoding {
      * Every implementation of the Java platform is required to support this character encoding.
      * </p>
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
-    public static final String UTF_8 = "UTF-8";
+    public static final String UTF_8 = StandardCharsets.UTF_8.name();
+
+    /**
+     * TODO Make private in 2.0.
+     *
+     * @deprecated TODO Make private in 2.0.
+     */
+    @Deprecated
+    public CharEncoding() {
+        // empty
+    }
+
 }

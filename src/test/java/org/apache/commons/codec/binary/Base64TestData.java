@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,26 +22,37 @@ package org.apache.commons.codec.binary;
  * Commons-Codec and OpenSSL. Notice that OpenSSL creates 64 character lines instead of the 76 of Commons-Codec.
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
- * @since 1.4
  */
-public class Base64TestData {
+class Base64TestData {
 
     /**
      * A valid base 64 encoding that has a length that is a multiple of 3.
-     * @see <a href="https://issues.apache.org/jira/browse/CODEC-101">Codec 101</a>
+     *
+     * @see <a href="https://issues.apache.org/jira/browse/CODEC-101">CODEC-101</a>
      */
-    public static final String CODEC_101_INPUT_LENGTH_IS_MULTIPLE_OF_3 = "124";
+    static final String CODEC_101_INPUT_LENGTH_IS_MULTIPLE_OF_3 = "124";
 
-    public static final String CODEC_98_NPE =
+    /**
+     * See CODEC-98.
+     *
+     * @see <a href="https://issues.apache.org/jira/browse/CODEC-98">CODEC-98</a>
+     */
+    static final String CODEC_98_NPE =
         "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWjAxMjM";
 
-    public static final String CODEC_98_NPE_DECODED =
+    /**
+     * See CODEC-98.
+     *
+     * @see <a href="https://issues.apache.org/jira/browse/CODEC-98">CODEC-98</a>
+     */
+    static final String CODEC_98_NPE_DECODED =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123";
 
-
-    // OpenSSL doesn't include the final \n, but it would be annoying beyond belief
-    // to further parameterize commons-codec to support this pointless variation.
-    final static String ENCODED_64_CHARS_PER_LINE =
+    /**
+     * OpenSSL doesn't include the final \n, but it would be annoying beyond belief
+     * to further parameterize commons-codec to support this pointless variation.
+     */
+    static final String ENCODED_64_CHARS_PER_LINE =
         "9IPNKwUvdLiIAp6ctz12SiQmOGstWyYvSPeevufDhrzaws65voykKjbIj33YWTa9\n" +
         "xA7c/FHypWclrZhQ7onfc3JE93BJ5fT4R9zAEdjbjy1hv4ZYNnET4WJeXMLJ/5p+\n" +
         "qBpTsPpepW8DNVYy1c02/1wyC+kgA6CvRUd9cSr/lt88AEdsTV4GMCn1+EwuAiYd\n" +
@@ -65,7 +76,7 @@ public class Base64TestData {
         "/6YAHZilo8at0OpkkNdNFuhwuGlkBqrZKNUj/gSiYYc06gF/r/z6iWAjpXJRW1qq\n" +
         "3CLZXdZFZ/VrqXeVjtOAu2A=\n";
 
-    final static String ENCODED_76_CHARS_PER_LINE =
+    static final String ENCODED_76_CHARS_PER_LINE =
         "9IPNKwUvdLiIAp6ctz12SiQmOGstWyYvSPeevufDhrzaws65voykKjbIj33YWTa9xA7c/FHypWcl\n" +
         "rZhQ7onfc3JE93BJ5fT4R9zAEdjbjy1hv4ZYNnET4WJeXMLJ/5p+qBpTsPpepW8DNVYy1c02/1wy\n" +
         "C+kgA6CvRUd9cSr/lt88AEdsTV4GMCn1+EwuAiYdivxuzn+cLM8q2jewqlI52tP9J7Cs8vqG71s6\n" +

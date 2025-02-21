@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,30 +25,22 @@ import java.security.MessageDigest;
  * <p>
  * This class is immutable and thread-safe.
  * </p>
- * <p>
- * Java 8 and up: SHA-224.
- * </p>
- * <p>
- * Java 9 and up: SHA3-224, SHA3-256, SHA3-384, SHA3-512.
- * </p>
+ * <ul>
+ * <li>Java 8 and up: SHA-224.</li>
+ * <li>Java 9 and up: SHA3-224, SHA3-256, SHA3-384, SHA3-512.</li>
+ * </ul>
  *
- * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#MessageDigest">
- *      Java 7 Cryptography Architecture Standard Algorithm Name Documentation</a>
- * @see <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest">
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest">
  *      Java 8 Cryptography Architecture Standard Algorithm Name Documentation</a>
- * @see <a href="https://docs.oracle.com/javase/9/docs/specs/security/standard-names.html#messagedigest-algorithms">
- *      Java 9 Cryptography Architecture Standard Algorithm Name Documentation</a>
- * @see <a href="https://docs.oracle.com/javase/10/docs/specs/security/standard-names.html#messagedigest-algorithms">
- *      Java 10 Cryptography Architecture Standard Algorithm Name Documentation</a>
  * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms">
  *      Java 11 Cryptography Architecture Standard Algorithm Name Documentation</a>
- * @see <a href="https://docs.oracle.com/en/java/javase/12/docs/specs/security/standard-names.html#messagedigest-algorithms">
- *      Java 12 Cryptography Architecture Standard Algorithm Name Documentation</a>
- * @see <a href="https://docs.oracle.com/en/java/javase/13/docs/specs/security/standard-names.html#messagedigest-algorithms">
- *      Java 13 Cryptography Architecture Standard Algorithm Name Documentation</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#messagedigest-algorithms">
+ *      Java 17 Cryptography Architecture Standard Algorithm Name Documentation</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/specs/security/standard-names.html#messagedigest-algorithms">
+ *      Java 21 Cryptography Architecture Standard Algorithm Name Documentation</a>
  *
- * @see <a href="http://dx.doi.org/10.6028/NIST.FIPS.180-4">FIPS PUB 180-4</a>
- * @see <a href="http://dx.doi.org/10.6028/NIST.FIPS.202">FIPS PUB 202</a>
+ * @see <a href="https://dx.doi.org/10.6028/NIST.FIPS.180-4">FIPS PUB 180-4</a>
+ * @see <a href="https://dx.doi.org/10.6028/NIST.FIPS.202">FIPS PUB 202</a>
  * @since 1.7
  */
 public class MessageDigestAlgorithms {
@@ -160,7 +152,7 @@ public class MessageDigestAlgorithms {
      * @since 1.11
      */
     public static String[] values() {
-        // N.B. do not use a constant array here as that can be changed externally by accident or design
+        // Do not use a constant array here as that can be changed externally by accident or design
         return new String[] {
             MD2, MD5, SHA_1, SHA_224, SHA_256, SHA_384,
             SHA_512, SHA_512_224, SHA_512_256, SHA3_224, SHA3_256, SHA3_384, SHA3_512

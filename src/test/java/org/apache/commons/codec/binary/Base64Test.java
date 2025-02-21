@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,15 @@
  */
 
 package org.apache.commons.codec.binary;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -30,14 +39,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * Test cases for Base64 class.
+ * Tests {@link Base64}.
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
  */
 public class Base64Test {
+
+    private static final String FOX_BASE64 = "VGhlIH@$#$@%F1aWN@#@#@@rIGJyb3duIGZve\n\r\t%#%#%#%CBqd##$#$W1wZWQgb3ZlciB0aGUgbGF6eSBkb2dzLg==";
+
+    private static final String FOX_TEXT = "The quick brown fox jumped over the lazy dogs.";
 
     private static final Charset CHARSET_UTF8 = StandardCharsets.UTF_8;
 
@@ -65,31 +76,67 @@ public class Base64Test {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
     };
 
+    /**
+     * Test base 64 decoding of the final trailing bits. Trailing encoded bytes
+     * cannot fit exactly into 6-bit characters so the last character has a limited
+     * alphabet where the final bits are zero. This asserts that illegal final
+     * characters throw an exception when decoding.
+     *
+     * @param nbits the number of trailing bits (must be a factor of 6 and {@code <24})
+     */
+    private static void assertBase64DecodingOfTrailingBits(final int nbits) {
+        final Base64 codec = new Base64(0, null, false, CodecPolicy.STRICT);
+        // Requires strict decoding
+        assertTrue(codec.isStrictDecoding());
+        assertEquals(CodecPolicy.STRICT, codec.getCodecPolicy());
+        // A lenient decoder should not re-encode to the same bytes
+        final Base64 defaultCodec = new Base64();
+        assertFalse(defaultCodec.isStrictDecoding());
+        assertEquals(CodecPolicy.LENIENT, defaultCodec.getCodecPolicy());
+
+        // Create the encoded bytes. The first characters must be valid so fill with 'zero'
+        // then pad to the block size.
+        final int length = nbits / 6;
+        final byte[] encoded = new byte[4];
+        Arrays.fill(encoded, 0, length, STANDARD_ENCODE_TABLE[0]);
+        Arrays.fill(encoded, length, encoded.length, (byte) '=');
+        // Compute how many bits would be discarded from 8-bit bytes
+        final int discard = nbits % 8;
+        final int emptyBitsMask = (1 << discard) - 1;
+        // Special case when an impossible number of trailing characters
+        final boolean invalid = length == 1;
+        // Enumerate all 64 possible final characters in the last position
+        final int last = length - 1;
+        for (int i = 0; i < 64; i++) {
+            encoded[last] = STANDARD_ENCODE_TABLE[i];
+            // If the lower bits are set we expect an exception. This is not a valid
+            // final character.
+            if (invalid || (i & emptyBitsMask) != 0) {
+                assertThrows(IllegalArgumentException.class, () -> codec.decode(encoded),
+                        "Final base-64 digit should not be allowed");
+                // The default lenient mode should decode this
+                final byte[] decoded = defaultCodec.decode(encoded);
+                // Re-encoding should not match the original array as it was invalid
+                assertFalse(Arrays.equals(encoded, defaultCodec.encode(decoded)));
+            } else {
+                // Otherwise this should decode
+                final byte[] decoded = codec.decode(encoded);
+                // Compute the bits that were encoded. This should match the final decoded byte.
+                final int bitsEncoded = i >> discard;
+                assertEquals(bitsEncoded, decoded[decoded.length - 1], "Invalid decoding of last character");
+                // Re-encoding should match the original array (requires the same padding character)
+                assertArrayEquals(encoded, codec.encode(decoded));
+            }
+        }
+    }
+
     private final Random random = new Random();
 
     /**
-     * @return Returns the random.
+     * @return the random.
      */
     public Random getRandom() {
         return this.random;
-    }
-
-    /**
-     * Test the isStringBase64 method.
-     */
-    @Test
-    public void testIsStringBase64() {
-        final String nullString = null;
-        final String emptyString = "";
-        final String validString = "abc===defg\n\r123456\r789\r\rABC\n\nDEF==GHI\r\nJKL==============";
-        final String invalidString = validString + (char) 0; // append null character
-
-        assertThrows(NullPointerException.class, () -> Base64.isBase64(nullString),
-                "Base64.isStringBase64() should not be null-safe.");
-
-        assertTrue(Base64.isBase64(emptyString), "Base64.isStringBase64(empty-string) is true");
-        assertTrue(Base64.isBase64(validString), "Base64.isStringBase64(valid-string) is true");
-        assertFalse(Base64.isBase64(invalidString), "Base64.isStringBase64(invalid-string) is false");
     }
 
     /**
@@ -125,11 +172,6 @@ public class Base64Test {
     }
 
     @Test
-    public void testBase64AtBufferStart() {
-        testBase64InBuffer(0, 100);
-    }
-
-    @Test
     public void testBase64AtBufferEnd() {
         testBase64InBuffer(100, 0);
     }
@@ -137,6 +179,34 @@ public class Base64Test {
     @Test
     public void testBase64AtBufferMiddle() {
         testBase64InBuffer(100, 100);
+    }
+
+    @Test
+    public void testBase64AtBufferStart() {
+        testBase64InBuffer(0, 100);
+    }
+
+    @Test
+    public void testBase64DecodingOfTrailing12Bits() {
+        assertBase64DecodingOfTrailingBits(12);
+    }
+
+    @Test
+    public void testBase64DecodingOfTrailing18Bits() {
+        assertBase64DecodingOfTrailingBits(18);
+    }
+
+    @Test
+    public void testBase64DecodingOfTrailing6Bits() {
+        assertBase64DecodingOfTrailingBits(6);
+    }
+
+    @Test
+    public void testBase64ImpossibleSamples() {
+        final Base64 codec = new Base64(0, null, false, CodecPolicy.STRICT);
+        for (final String s : BASE64_IMPOSSIBLE_CASES) {
+            assertThrows(IllegalArgumentException.class, () -> codec.decode(s));
+        }
     }
 
     private void testBase64InBuffer(final int startPasSize, final int endPadSize) {
@@ -150,25 +220,67 @@ public class Base64Test {
         assertEquals("SGVsbG8gV29ybGQ=", encodedContent, "encoding hello world");
     }
 
-    /**
-     * Test our decode with pad character in the middle. (Our current
-     * implementation: halt decode and return what we've got so far).
-     *
-     * The point of this test is not to say
-     * "this is the correct way to decode base64." The point is simply to keep
-     * us aware of the current logic since 1.4 so we don't accidentally break it
-     * without realizing.
-     *
-     * Note for historians. The 1.3 logic would decode to:
-     * "Hello World\u0000Hello World" -- null in the middle --- and 1.4
-     * unwittingly changed it to current logic.
-     */
     @Test
-    public void testDecodeWithInnerPad() {
-        final String content = "SGVsbG8gV29ybGQ=SGVsbG8gV29ybGQ=";
-        final byte[] result = Base64.decodeBase64(content);
-        final byte[] shouldBe = StringUtils.getBytesUtf8("Hello World");
-        assertArrayEquals(result, shouldBe, "decode should halt at pad (=)");
+    public void testBuilderCodecPolicy() {
+        assertEquals(CodecPolicy.LENIENT, Base64.builder().get().getCodecPolicy());
+        assertEquals(CodecPolicy.LENIENT, Base64.builder().setDecodingPolicy(CodecPolicy.LENIENT).get().getCodecPolicy());
+        assertEquals(CodecPolicy.STRICT, Base64.builder().setDecodingPolicy(CodecPolicy.STRICT).get().getCodecPolicy());
+        assertEquals(CodecPolicy.LENIENT, Base64.builder().setDecodingPolicy(CodecPolicy.STRICT).setDecodingPolicy(null).get().getCodecPolicy());
+        assertEquals(CodecPolicy.LENIENT, Base64.builder().setDecodingPolicy(null).get().getCodecPolicy());
+    }
+
+    @Test
+    public void testBuilderLineAttributes() {
+        assertNull(Base64.builder().get().getLineSeparator());
+        assertNull(Base64.builder().setLineSeparator(BaseNCodec.CHUNK_SEPARATOR).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(4).setLineSeparator(BaseNCodec.CHUNK_SEPARATOR).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(4).setLineSeparator(null).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(10).setLineSeparator(null).get().getLineSeparator());
+        assertNull(Base64.builder().setLineLength(-1).setLineSeparator(null).get().getLineSeparator());
+        assertNull(Base64.builder().setLineLength(0).setLineSeparator(null).get().getLineSeparator());
+        assertArrayEquals(new byte[] { 1 }, Base64.builder().setLineLength(4).setLineSeparator((byte) 1).get().getLineSeparator());
+        assertEquals("Zm94\r\n", Base64.builder().setLineLength(4).get().encodeToString("fox".getBytes(CHARSET_UTF8)));
+    }
+
+    @Test
+    public void testBuilderPadingByte() {
+        assertNull(Base64.builder().get().getLineSeparator());
+        assertNull(Base64.builder().setLineSeparator(BaseNCodec.CHUNK_SEPARATOR).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(4).setLineSeparator(BaseNCodec.CHUNK_SEPARATOR).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(4).setLineSeparator(null).get().getLineSeparator());
+        assertArrayEquals(BaseNCodec.CHUNK_SEPARATOR, Base64.builder().setLineLength(10).setLineSeparator(null).get().getLineSeparator());
+        assertNull(Base64.builder().setLineLength(-1).setLineSeparator(null).get().getLineSeparator());
+        assertNull(Base64.builder().setLineLength(0).setLineSeparator(null).get().getLineSeparator());
+        assertArrayEquals(new byte[] { 1 }, Base64.builder().setLineLength(4).setLineSeparator((byte) 1).get().getLineSeparator());
+        assertEquals("VGhlIGJyb3duIGZveA==", Base64.builder().get().encodeToString("The brown fox".getBytes(CHARSET_UTF8)));
+        assertEquals("VGhlIGJyb3duIGZveA__", Base64.builder().setPadding((byte) '_').get().encodeToString("The brown fox".getBytes(CHARSET_UTF8)));
+    }
+
+    @Test
+    public void testBuilderUrlSafe() {
+        assertFalse(Base64.builder().get().isUrlSafe());
+        assertFalse(Base64.builder().setUrlSafe(false).get().isUrlSafe());
+        assertFalse(Base64.builder().setUrlSafe(true).setUrlSafe(false).get().isUrlSafe());
+        assertTrue(Base64.builder().setUrlSafe(false).setUrlSafe(true).get().isUrlSafe());
+    }
+
+    @Test
+    public void testByteToStringVariations() throws DecoderException {
+        final Base64 base64 = new Base64(0);
+        final byte[] b1 = StringUtils.getBytesUtf8("Hello World");
+        final byte[] b2 = {};
+        final byte[] b3 = null;
+        final byte[] b4 = Hex.decodeHex("2bf7cc2701fe4397b49ebeed5acc7090"); // for url-safe tests
+
+        assertEquals("SGVsbG8gV29ybGQ=", base64.encodeToString(b1), "byteToString Hello World");
+        assertEquals("SGVsbG8gV29ybGQ=", Base64.encodeBase64String(b1), "byteToString static Hello World");
+        assertEquals("", base64.encodeToString(b2), "byteToString \"\"");
+        assertEquals("", Base64.encodeBase64String(b2), "byteToString static \"\"");
+        assertNull(base64.encodeToString(b3), "byteToString null");
+        assertNull(Base64.encodeBase64String(b3), "byteToString static null");
+        assertEquals("K/fMJwH+Q5e0nr7tWsxwkA==", base64.encodeToString(b4), "byteToString UUID");
+        assertEquals("K/fMJwH+Q5e0nr7tWsxwkA==", Base64.encodeBase64String(b4), "byteToString static UUID");
+        assertEquals("K_fMJwH-Q5e0nr7tWsxwkA", Base64.encodeBase64URLSafeString(b4), "byteToString static-url-safe UUID");
     }
 
     /**
@@ -183,6 +295,57 @@ public class Base64Test {
         final String actualResult = Base64TestData.ENCODED_76_CHARS_PER_LINE.replace("\n", "\r\n");
         final byte[] actualEncode = StringUtils.getBytesUtf8(actualResult);
         assertArrayEquals(expectedEncode, actualEncode, "chunkedEncodeMultipleOf76");
+    }
+
+    @Test
+    public void testCodec112() { // size calculation assumes always chunked
+        final byte[] in = { 0 };
+        final byte[] out = Base64.encodeBase64(in);
+        Base64.encodeBase64(in, false, false, out.length);
+        // TODO Assert??
+    }
+
+    /**
+     * Tests <a href="https://issues.apache.org/jira/browse/CODEC-263">CODEC-263</a>.
+     */
+    public void testCodec263() {
+      Base64.decodeBase64("publishMessage");
+      assertTrue(Base64.isBase64("publishMessage"));
+    }
+
+    /**
+     * Test for CODEC-265: Encode a 1GiB file.
+     *
+     * @see <a href="https://issues.apache.org/jira/projects/CODEC/issues/CODEC-265">CODEC-265</a>
+     */
+    @Test
+    public void testCodec265() {
+        // 1GiB file to encode: 2^30 bytes
+        final int size1GiB = 1 << 30;
+
+        // Expecting a size of 4 output bytes per 3 input bytes plus the trailing bytes
+        // padded to a block size of 4.
+        final int blocks = (int) Math.ceil(size1GiB / 3.0);
+        final int expectedLength = 4 * blocks;
+
+        // This test is memory hungry. Check we can run it.
+        final long presumableFreeMemory = BaseNCodecTest.getPresumableFreeMemory();
+
+        // Estimate the maximum memory required:
+        // 1GiB + 1GiB + ~2GiB + ~1.33GiB + 32 KiB  = ~5.33GiB
+        //
+        // 1GiB: Input buffer to encode
+        // 1GiB: Existing working buffer (due to doubling of default buffer size of 8192)
+        // ~2GiB: New working buffer to allocate (due to doubling)
+        // ~1.33GiB: Expected output size (since the working buffer is copied at the end)
+        // 32KiB: Some headroom
+        final long estimatedMemory = (long) size1GiB * 4 + expectedLength + 32 * 1024;
+        Assumptions.assumeTrue(presumableFreeMemory > estimatedMemory,
+                "Not enough free memory for the test");
+
+        final byte[] bytes = new byte[size1GiB];
+        final byte[] encoded = Base64.encodeBase64(bytes);
+        assertEquals(expectedLength, encoded.length);
     }
 
     /**
@@ -255,6 +418,31 @@ public class Base64Test {
     }
 
     @Test
+    public void testConstructor_Int_ByteArray_Boolean() {
+        final Base64 base64 = new Base64(65, new byte[] { '\t' }, false);
+        final byte[] encoded = base64.encode(BaseNTestData.DECODED);
+        String expectedResult = Base64TestData.ENCODED_64_CHARS_PER_LINE;
+        expectedResult = expectedResult.replace('\n', '\t');
+        final String result = StringUtils.newStringUtf8(encoded);
+        assertEquals(expectedResult, result, "new Base64(65, \\t, false)");
+    }
+
+    @Test
+    public void testConstructor_Int_ByteArray_Boolean_UrlSafe() {
+        // url-safe variation
+        final Base64 base64 = new Base64(64, new byte[] { '\t' }, true);
+        final byte[] encoded = base64.encode(BaseNTestData.DECODED);
+        String expectedResult = Base64TestData.ENCODED_64_CHARS_PER_LINE;
+        expectedResult = expectedResult.replace("=", ""); // url-safe has no
+                                                                // == padding.
+        expectedResult = expectedResult.replace('\n', '\t');
+        expectedResult = expectedResult.replace('+', '-');
+        expectedResult = expectedResult.replace('/', '_');
+        final String result = StringUtils.newStringUtf8(encoded);
+        assertEquals(result, expectedResult, "new Base64(64, \\t, true)");
+    }
+
+    @Test
     public void testConstructors() {
         Base64 base64;
         base64 = new Base64();
@@ -284,28 +472,58 @@ public class Base64Test {
     }
 
     @Test
-    public void testConstructor_Int_ByteArray_Boolean() {
-        final Base64 base64 = new Base64(65, new byte[] { '\t' }, false);
-        final byte[] encoded = base64.encode(BaseNTestData.DECODED);
-        String expectedResult = Base64TestData.ENCODED_64_CHARS_PER_LINE;
-        expectedResult = expectedResult.replace('\n', '\t');
-        final String result = StringUtils.newStringUtf8(encoded);
-        assertEquals(expectedResult, result, "new Base64(65, \\t, false)");
+    public void testCustomEncodingAlphabet() {
+        // created a duplicate of STANDARD_ENCODE_TABLE and replaced two chars with
+        // custom values not already present in table
+        // A => . B => -
+        // @formatter:off
+        final byte[] encodeTable = {
+                '.', '-', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+        };
+        // @formatter:on
+
+        // two instances: one with default table and one with adjusted encoding table
+        final Base64 b64 = new Base64();
+        final Base64 b64customEncoding = Base64.builder().setEncodeTable(encodeTable).get();
+
+        final String content = "! Hello World - this §$%";
+
+        final byte[] encodedBytes = b64.encode(StringUtils.getBytesUtf8(content));
+        final String encodedContent = StringUtils.newStringUtf8(encodedBytes);
+
+        final byte[] encodedBytesCustom = b64customEncoding.encode(StringUtils.getBytesUtf8(content));
+        final String encodedContentCustom = StringUtils.newStringUtf8(encodedBytesCustom);
+
+        assertTrue(encodedContent.contains("A") && encodedContent.contains("B"),
+                "testing precondition not met - ecodedContent should contain parts of modified table");
+
+        assertEquals(encodedContent.replace('A', '.').replace('B', '-') // replace alphabet adjustments
+                .replace("=", "") // remove padding (not default alphabet)
+                , encodedContentCustom);
+
+        // try decode encoded content
+        final byte[] decode = b64customEncoding.decode(encodedBytesCustom);
+        final String decodeString = StringUtils.newStringUtf8(decode);
+
+        assertEquals(content, decodeString);
     }
 
     @Test
-    public void testConstructor_Int_ByteArray_Boolean_UrlSafe() {
-        // url-safe variation
-        final Base64 base64 = new Base64(64, new byte[] { '\t' }, true);
-        final byte[] encoded = base64.encode(BaseNTestData.DECODED);
-        String expectedResult = Base64TestData.ENCODED_64_CHARS_PER_LINE;
-        expectedResult = expectedResult.replace("=", ""); // url-safe has no
-                                                                // == padding.
-        expectedResult = expectedResult.replace('\n', '\t');
-        expectedResult = expectedResult.replace('+', '-');
-        expectedResult = expectedResult.replace('/', '_');
-        final String result = StringUtils.newStringUtf8(encoded);
-        assertEquals(result, expectedResult, "new Base64(64, \\t, true)");
+    public void testCustomEncodingAlphabet_illegal() {
+        final byte[] encodeTable = {
+                '.', '-', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'
+        };
+        assertThrows(IllegalArgumentException.class, () -> Base64.builder().setEncodeTable(encodeTable).get());
+    }
+
+    private void testDecodeEncode(final String encodedText) {
+        final String decodedText = StringUtils.newStringUsAscii(Base64.decodeBase64(encodedText));
+        final String encodedText2 = Base64.encodeBase64String(StringUtils.getBytesUtf8(decodedText));
+        assertEquals(encodedText, encodedText2);
     }
 
     /**
@@ -345,6 +563,27 @@ public class Base64Test {
         assertEquals(0, Base64.decodeBase64("==\n".getBytes(CHARSET_UTF8)).length);
         assertEquals(0, Base64.decodeBase64("=\n".getBytes(CHARSET_UTF8)).length);
         assertEquals(0, Base64.decodeBase64("\n".getBytes(CHARSET_UTF8)).length);
+    }
+
+    /**
+     * Test our decode with pad character in the middle. (Our current
+     * implementation: halt decode and return what we've got so far).
+     *
+     * The point of this test is not to say
+     * "this is the correct way to decode base64." The point is simply to keep
+     * us aware of the current logic since 1.4 so we don't accidentally break it
+     * without realizing.
+     *
+     * Note for historians. The 1.3 logic would decode to:
+     * "Hello World\u0000Hello World" -- null in the middle --- and 1.4
+     * unwittingly changed it to current logic.
+     */
+    @Test
+    public void testDecodeWithInnerPad() {
+        final String content = "SGVsbG8gV29ybGQ=SGVsbG8gV29ybGQ=";
+        final byte[] result = Base64.decodeBase64(content);
+        final byte[] shouldBe = StringUtils.getBytesUtf8("Hello World");
+        assertArrayEquals(result, shouldBe, "decode should halt at pad (=)");
     }
 
     @Test
@@ -387,12 +626,18 @@ public class Base64Test {
         assertNull(Base64.decodeBase64((byte[]) null), "empty base64 encode");
     }
 
+    private void testEncodeDecode(final String plainText) {
+        final String encodedText = Base64.encodeBase64String(StringUtils.getBytesUtf8(plainText));
+        final String decodedText = StringUtils.newStringUsAscii(Base64.decodeBase64(encodedText));
+        assertEquals(plainText, decodedText);
+    }
+
     // encode/decode a large random array
     @Test
     public void testEncodeDecodeRandom() {
         for (int i = 1; i < 5; i++) {
-            final byte[] data = new byte[this.getRandom().nextInt(10000) + 1];
-            this.getRandom().nextBytes(data);
+            final byte[] data = new byte[getRandom().nextInt(10000) + 1];
+            getRandom().nextBytes(data);
             final byte[] enc = Base64.encodeBase64(data);
             assertTrue(Base64.isBase64(enc));
             final byte[] data2 = Base64.decodeBase64(enc);
@@ -405,7 +650,7 @@ public class Base64Test {
     public void testEncodeDecodeSmall() {
         for (int i = 0; i < 12; i++) {
             final byte[] data = new byte[i];
-            this.getRandom().nextBytes(data);
+            getRandom().nextBytes(data);
             final byte[] enc = Base64.encodeBase64(data);
             assertTrue(Base64.isBase64(enc), "\"" + new String(enc) + "\" is Base64 data.");
             final byte[] data2 = Base64.decodeBase64(enc);
@@ -421,24 +666,29 @@ public class Base64Test {
         testEncodeOverMaxSize(2);
     }
 
-    @Test
-    public void testCodec112() { // size calculation assumes always chunked
-        final byte[] in = { 0 };
-        final byte[] out = Base64.encodeBase64(in);
-        Base64.encodeBase64(in, false, false, out.length);
-        // TODO Assert??
-    }
-
     private void testEncodeOverMaxSize(final int maxSize) {
         assertThrows(IllegalArgumentException.class, () -> Base64.encodeBase64(BaseNTestData.DECODED, true, false, maxSize));
     }
 
+    /**
+     * Tests a lineSeparator much bigger than DEFAULT_BUFFER_SIZE.
+     *
+     * @see "<a href='https://mail-archives.apache.org/mod_mbox/commons-dev/201202.mbox/%3C4F3C85D7.5060706@snafu.de%3E'>dev@commons.apache.org</a>"
+     */
+    @Test
+    public void testHugeLineSeparator() {
+        final int BaseNCodec_DEFAULT_BUFFER_SIZE = 8192;
+        final int Base64_BYTES_PER_ENCODED_BLOCK = 4;
+        final byte[] baLineSeparator = new byte[BaseNCodec_DEFAULT_BUFFER_SIZE * 4 - 3];
+        final Base64 b64 = new Base64(Base64_BYTES_PER_ENCODED_BLOCK, baLineSeparator);
+        final String strOriginal = "Hello World";
+        final String strDecoded = new String(b64.decode(b64.encode(StringUtils.getBytesUtf8(strOriginal))));
+        assertEquals(strOriginal, strDecoded, "testDEFAULT_BUFFER_SIZE");
+    }
+
     @Test
     public void testIgnoringNonBase64InDecode() throws Exception {
-        assertEquals("The quick brown fox jumped over the lazy dogs.",
-                new String(Base64.decodeBase64(
-                        "VGhlIH@$#$@%F1aWN@#@#@@rIGJyb3duIGZve\n\r\t%#%#%#%CBqd##$#$W1wZWQgb3ZlciB0aGUgbGF6eSBkb2dzLg=="
-                                .getBytes(CHARSET_UTF8))));
+        assertEquals(FOX_TEXT, new String(Base64.decodeBase64(FOX_BASE64.getBytes(CHARSET_UTF8))));
     }
 
     @Test
@@ -461,6 +711,24 @@ public class Base64Test {
     }
 
     /**
+     * Test the isStringBase64 method.
+     */
+    @Test
+    public void testIsStringBase64() {
+        final String nullString = null;
+        final String emptyString = "";
+        final String validString = "abc===defg\n\r123456\r789\r\rABC\n\nDEF==GHI\r\nJKL==============";
+        final String invalidString = validString + (char) 0; // append null character
+
+        assertThrows(NullPointerException.class, () -> Base64.isBase64(nullString),
+                "Base64.isStringBase64() should not be null-safe.");
+
+        assertTrue(Base64.isBase64(emptyString), "Base64.isStringBase64(empty-string) is true");
+        assertTrue(Base64.isBase64(validString), "Base64.isStringBase64(valid-string) is true");
+        assertFalse(Base64.isBase64(invalidString), "Base64.isStringBase64(invalid-string) is false");
+    }
+
+    /**
      * Tests isUrlSafe.
      */
     @Test
@@ -477,7 +745,7 @@ public class Base64Test {
 
     @Test
     public void testKnownDecodings() {
-        assertEquals("The quick brown fox jumped over the lazy dogs.", new String(Base64.decodeBase64(
+        assertEquals(FOX_TEXT, new String(Base64.decodeBase64(
                 "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2dzLg==".getBytes(CHARSET_UTF8))));
         assertEquals("It was the best of times, it was the worst of times.", new String(Base64.decodeBase64(
                 "SXQgd2FzIHRoZSBiZXN0IG9mIHRpbWVzLCBpdCB3YXMgdGhlIHdvcnN0IG9mIHRpbWVzLg==".getBytes(CHARSET_UTF8))));
@@ -493,7 +761,7 @@ public class Base64Test {
     @Test
     public void testKnownEncodings() {
         assertEquals("VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2dzLg==", new String(
-                Base64.encodeBase64("The quick brown fox jumped over the lazy dogs.".getBytes(CHARSET_UTF8))));
+                Base64.encodeBase64(FOX_TEXT.getBytes(CHARSET_UTF8))));
         assertEquals(
                 "YmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJs\r\nYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFo\r\nIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBibGFoIGJsYWggYmxhaCBi\r\nbGFoIGJsYWg=\r\n",
                 new String(Base64.encodeBase64Chunked(
@@ -552,6 +820,12 @@ public class Base64Test {
     }
 
     @Test
+    public void testObjectEncode() throws Exception {
+        final Base64 b64 = new Base64();
+        assertEquals("SGVsbG8gV29ybGQ=", new String(b64.encode("Hello World".getBytes(CHARSET_UTF8))));
+    }
+
+    @Test
     public void testObjectEncodeWithInvalidParameter() {
         assertThrows(EncoderException.class, () -> new Base64().encode("Yadayadayada"),
                 "encode(Object) didn't throw an exception when passed a String object");
@@ -572,18 +846,20 @@ public class Base64Test {
     }
 
     @Test
-    public void testObjectEncode() throws Exception {
-        final Base64 b64 = new Base64();
-        assertEquals("SGVsbG8gV29ybGQ=", new String(b64.encode("Hello World".getBytes(CHARSET_UTF8))));
-    }
-
-    @Test
     public void testPairs() {
         assertEquals("AAA=", new String(Base64.encodeBase64(new byte[] { 0, 0 })));
         for (int i = -128; i <= 127; i++) {
-            final byte test[] = { (byte) i, (byte) i };
+            final byte[] test = { (byte) i, (byte) i };
             assertArrayEquals(test, Base64.decodeBase64(Base64.encodeBase64(test)));
         }
+    }
+
+    /**
+     * Tests RFC 1421 section 4.3.2.4 chuck size definition.
+     */
+    @Test
+    public void testRfc1421Section6Dot8ChunkSizeDefinition() {
+        assertEquals(64, BaseNCodec.PEM_CHUNK_SIZE);
     }
 
     /**
@@ -603,14 +879,6 @@ public class Base64Test {
     }
 
     /**
-     * Tests RFC 1421 section 4.3.2.4 chuck size definition.
-     */
-    @Test
-    public void testRfc1421Section6Dot8ChunkSizeDefinition() {
-        assertEquals(64, BaseNCodec.PEM_CHUNK_SIZE);
-    }
-
-    /**
      * Tests RFC 4648 section 10 test vectors.
      * <ul>
      * <li>BASE64("") = ""</li>
@@ -622,7 +890,7 @@ public class Base64Test {
      * <li>BASE64("foobar") = "Zm9vYmFy"</li>
      * </ul>
      *
-     * @see <a href="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/
+     * @see <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/
      *      html/rfc4648</a>
      */
     @Test
@@ -648,7 +916,33 @@ public class Base64Test {
      * <li>BASE64("foobar") = "Zm9vYmFy"</li>
      * </ul>
      *
-     * @see <a href="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/
+     * @see <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/
+     *      html/rfc4648</a>
+     */
+    @Test
+    public void testRfc4648Section10DecodeEncode() {
+        testDecodeEncode("");
+        testDecodeEncode("Zg==");
+        testDecodeEncode("Zm8=");
+        testDecodeEncode("Zm9v");
+        testDecodeEncode("Zm9vYg==");
+        testDecodeEncode("Zm9vYmE=");
+        testDecodeEncode("Zm9vYmFy");
+    }
+
+    /**
+     * Tests RFC 4648 section 10 test vectors.
+     * <ul>
+     * <li>BASE64("") = ""</li>
+     * <li>BASE64("f") = "Zg=="</li>
+     * <li>BASE64("fo") = "Zm8="</li>
+     * <li>BASE64("foo") = "Zm9v"</li>
+     * <li>BASE64("foob") = "Zm9vYg=="</li>
+     * <li>BASE64("fooba") = "Zm9vYmE="</li>
+     * <li>BASE64("foobar") = "Zm9vYmFy"</li>
+     * </ul>
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/
      *      html/rfc4648</a>
      */
     @Test
@@ -675,7 +969,7 @@ public class Base64Test {
      * <li>BASE64("foobar") = "Zm9vYmFy"</li>
      * </ul>
      *
-     * @see <a href="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/
+     * @see <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/
      *      html/rfc4648</a>
      */
     @Test
@@ -701,39 +995,7 @@ public class Base64Test {
      * <li>BASE64("foobar") = "Zm9vYmFy"</li>
      * </ul>
      *
-     * @see <a href="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/
-     *      html/rfc4648</a>
-     */
-    @Test
-    public void testRfc4648Section10DecodeEncode() {
-        testDecodeEncode("");
-        testDecodeEncode("Zg==");
-        testDecodeEncode("Zm8=");
-        testDecodeEncode("Zm9v");
-        testDecodeEncode("Zm9vYg==");
-        testDecodeEncode("Zm9vYmE=");
-        testDecodeEncode("Zm9vYmFy");
-    }
-
-    private void testDecodeEncode(final String encodedText) {
-        final String decodedText = StringUtils.newStringUsAscii(Base64.decodeBase64(encodedText));
-        final String encodedText2 = Base64.encodeBase64String(StringUtils.getBytesUtf8(decodedText));
-        assertEquals(encodedText, encodedText2);
-    }
-
-    /**
-     * Tests RFC 4648 section 10 test vectors.
-     * <ul>
-     * <li>BASE64("") = ""</li>
-     * <li>BASE64("f") = "Zg=="</li>
-     * <li>BASE64("fo") = "Zm8="</li>
-     * <li>BASE64("foo") = "Zm9v"</li>
-     * <li>BASE64("foob") = "Zm9vYg=="</li>
-     * <li>BASE64("fooba") = "Zm9vYmE="</li>
-     * <li>BASE64("foobar") = "Zm9vYmFy"</li>
-     * </ul>
-     *
-     * @see <a href="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/
+     * @see <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/
      *      html/rfc4648</a>
      */
     @Test
@@ -745,12 +1007,6 @@ public class Base64Test {
         testEncodeDecode("foob");
         testEncodeDecode("fooba");
         testEncodeDecode("foobar");
-    }
-
-    private void testEncodeDecode(final String plainText) {
-        final String encodedText = Base64.encodeBase64String(StringUtils.getBytesUtf8(plainText));
-        final String decodedText = StringUtils.newStringUsAscii(Base64.decodeBase64(encodedText));
-        assertEquals(plainText, decodedText);
     }
 
     @Test
@@ -861,7 +1117,7 @@ public class Base64Test {
         assertEquals("Zw==", new String(Base64.encodeBase64(new byte[] { (byte) 103 })));
         assertEquals("aA==", new String(Base64.encodeBase64(new byte[] { (byte) 104 })));
         for (int i = -128; i <= 127; i++) {
-            final byte test[] = { (byte) i };
+            final byte[] test = { (byte) i };
             assertArrayEquals(test, Base64.decodeBase64(Base64.encodeBase64(test)));
         }
     }
@@ -973,6 +1229,30 @@ public class Base64Test {
         assertEquals("Zg==\r\n", new String(Base64.encodeBase64Chunked(new byte[] { (byte) 102 })));
         assertEquals("Zw==\r\n", new String(Base64.encodeBase64Chunked(new byte[] { (byte) 103 })));
         assertEquals("aA==\r\n", new String(Base64.encodeBase64Chunked(new byte[] { (byte) 104 })));
+    }
+
+    @Test
+    public void testStringToByteVariations() throws DecoderException {
+        final Base64 base64 = new Base64();
+        final String s1 = "SGVsbG8gV29ybGQ=\r\n";
+        final String s2 = "";
+        final String s3 = null;
+        final String s4a = "K/fMJwH+Q5e0nr7tWsxwkA==\r\n";
+        final String s4b = "K_fMJwH-Q5e0nr7tWsxwkA";
+        final byte[] b4 = Hex.decodeHex("2bf7cc2701fe4397b49ebeed5acc7090"); // for
+                                                                                            // url-safe
+                                                                                            // tests
+
+        assertEquals("Hello World", StringUtils.newStringUtf8(base64.decode(s1)), "StringToByte Hello World");
+        assertEquals("Hello World", StringUtils.newStringUtf8((byte[]) base64.decode((Object) s1)), "StringToByte Hello World");
+        assertEquals("Hello World", StringUtils.newStringUtf8(Base64.decodeBase64(s1)), "StringToByte static Hello World");
+        assertEquals("", StringUtils.newStringUtf8(base64.decode(s2)), "StringToByte \"\"");
+        assertEquals("", StringUtils.newStringUtf8(Base64.decodeBase64(s2)), "StringToByte static \"\"");
+        assertNull(StringUtils.newStringUtf8(base64.decode(s3)), "StringToByte null");
+        assertNull(StringUtils.newStringUtf8(Base64.decodeBase64(s3)), "StringToByte static null");
+        assertArrayEquals(b4, base64.decode(s4b), "StringToByte UUID");
+        assertArrayEquals(b4, Base64.decodeBase64(s4a), "StringToByte static UUID");
+        assertArrayEquals(b4, Base64.decodeBase64(s4b), "StringToByte static-url-safe UUID");
     }
 
     @Test
@@ -1216,60 +1496,6 @@ public class Base64Test {
         }
     }
 
-    @Test
-    public void testByteToStringVariations() throws DecoderException {
-        final Base64 base64 = new Base64(0);
-        final byte[] b1 = StringUtils.getBytesUtf8("Hello World");
-        final byte[] b2 = {};
-        final byte[] b3 = null;
-        final byte[] b4 = Hex.decodeHex("2bf7cc2701fe4397b49ebeed5acc7090"); // for
-                                                                                            // url-safe
-                                                                                            // tests
-
-        assertEquals("SGVsbG8gV29ybGQ=", base64.encodeToString(b1),
-                "byteToString Hello World");
-        assertEquals( "SGVsbG8gV29ybGQ=", Base64.encodeBase64String(b1),
-                "byteToString static Hello World");
-        assertEquals("", base64.encodeToString(b2),
-                "byteToString \"\"");
-        assertEquals("", Base64.encodeBase64String(b2),
-                "byteToString static \"\"");
-        assertNull(base64.encodeToString(b3),
-                "byteToString null");
-        assertNull(Base64.encodeBase64String(b3),
-                "byteToString static null");
-        assertEquals("K/fMJwH+Q5e0nr7tWsxwkA==", base64.encodeToString(b4),
-                "byteToString UUID");
-        assertEquals("K/fMJwH+Q5e0nr7tWsxwkA==", Base64.encodeBase64String(b4),
-                "byteToString static UUID");
-        assertEquals("K_fMJwH-Q5e0nr7tWsxwkA", Base64.encodeBase64URLSafeString(b4),
-                "byteToString static-url-safe UUID");
-    }
-
-    @Test
-    public void testStringToByteVariations() throws DecoderException {
-        final Base64 base64 = new Base64();
-        final String s1 = "SGVsbG8gV29ybGQ=\r\n";
-        final String s2 = "";
-        final String s3 = null;
-        final String s4a = "K/fMJwH+Q5e0nr7tWsxwkA==\r\n";
-        final String s4b = "K_fMJwH-Q5e0nr7tWsxwkA";
-        final byte[] b4 = Hex.decodeHex("2bf7cc2701fe4397b49ebeed5acc7090"); // for
-                                                                                            // url-safe
-                                                                                            // tests
-
-        assertEquals("Hello World", StringUtils.newStringUtf8(base64.decode(s1)), "StringToByte Hello World");
-        assertEquals("Hello World", StringUtils.newStringUtf8((byte[]) base64.decode((Object) s1)), "StringToByte Hello World");
-        assertEquals("Hello World", StringUtils.newStringUtf8(Base64.decodeBase64(s1)), "StringToByte static Hello World");
-        assertEquals("", StringUtils.newStringUtf8(base64.decode(s2)), "StringToByte \"\"");
-        assertEquals("", StringUtils.newStringUtf8(Base64.decodeBase64(s2)), "StringToByte static \"\"");
-        assertNull(StringUtils.newStringUtf8(base64.decode(s3)), "StringToByte null");
-        assertNull(StringUtils.newStringUtf8(Base64.decodeBase64(s3)), "StringToByte static null");
-        assertArrayEquals(b4, base64.decode(s4b), "StringToByte UUID");
-        assertArrayEquals(b4, Base64.decodeBase64(s4a), "StringToByte static UUID");
-        assertArrayEquals(b4, Base64.decodeBase64(s4b), "StringToByte static-url-safe UUID");
-    }
-
     private String toString(final byte[] data) {
         final StringBuilder buf = new StringBuilder();
         for (int i = 0; i < data.length; i++) {
@@ -1279,133 +1505,5 @@ public class Base64Test {
             }
         }
         return buf.toString();
-    }
-
-    /**
-     * Tests a lineSeparator much bigger than DEFAULT_BUFFER_SIZE.
-     *
-     * @see "<a href='https://mail-archives.apache.org/mod_mbox/commons-dev/201202.mbox/%3C4F3C85D7.5060706@snafu.de%3E'>dev@commons.apache.org</a>"
-     */
-    @Test
-    public void testHugeLineSeparator() {
-        final int BaseNCodec_DEFAULT_BUFFER_SIZE = 8192;
-        final int Base64_BYTES_PER_ENCODED_BLOCK = 4;
-        final byte[] baLineSeparator = new byte[BaseNCodec_DEFAULT_BUFFER_SIZE * 4 - 3];
-        final Base64 b64 = new Base64(Base64_BYTES_PER_ENCODED_BLOCK, baLineSeparator);
-        final String strOriginal = "Hello World";
-        final String strDecoded = new String(b64.decode(b64.encode(StringUtils.getBytesUtf8(strOriginal))));
-        assertEquals(strOriginal, strDecoded, "testDEFAULT_BUFFER_SIZE");
-    }
-
-    @Test
-    public void testBase64ImpossibleSamples() {
-        final Base64 codec = new Base64(0, null, false, CodecPolicy.STRICT);
-        for (final String s : BASE64_IMPOSSIBLE_CASES) {
-            assertThrows(IllegalArgumentException.class, () -> codec.decode(s));
-        }
-    }
-
-    @Test
-    public void testBase64DecodingOfTrailing6Bits() {
-        assertBase64DecodingOfTrailingBits(6);
-    }
-
-    @Test
-    public void testBase64DecodingOfTrailing12Bits() {
-        assertBase64DecodingOfTrailingBits(12);
-    }
-
-    @Test
-    public void testBase64DecodingOfTrailing18Bits() {
-        assertBase64DecodingOfTrailingBits(18);
-    }
-
-    /**
-     * Test base 64 decoding of the final trailing bits. Trailing encoded bytes
-     * cannot fit exactly into 6-bit characters so the last character has a limited
-     * alphabet where the final bits are zero. This asserts that illegal final
-     * characters throw an exception when decoding.
-     *
-     * @param nbits the number of trailing bits (must be a factor of 6 and {@code <24})
-     */
-    private static void assertBase64DecodingOfTrailingBits(final int nbits) {
-        final Base64 codec = new Base64(0, null, false, CodecPolicy.STRICT);
-        // Requires strict decoding
-        assertTrue(codec.isStrictDecoding());
-        assertEquals(CodecPolicy.STRICT, codec.getCodecPolicy());
-        // A lenient decoder should not re-encode to the same bytes
-        final Base64 defaultCodec = new Base64();
-        assertFalse(defaultCodec.isStrictDecoding());
-        assertEquals(CodecPolicy.LENIENT, defaultCodec.getCodecPolicy());
-
-        // Create the encoded bytes. The first characters must be valid so fill with 'zero'
-        // then pad to the block size.
-        final int length = nbits / 6;
-        final byte[] encoded = new byte[4];
-        Arrays.fill(encoded, 0, length, STANDARD_ENCODE_TABLE[0]);
-        Arrays.fill(encoded, length, encoded.length, (byte) '=');
-        // Compute how many bits would be discarded from 8-bit bytes
-        final int discard = nbits % 8;
-        final int emptyBitsMask = (1 << discard) - 1;
-        // Special case when an impossible number of trailing characters
-        final boolean invalid = length == 1;
-        // Enumerate all 64 possible final characters in the last position
-        final int last = length - 1;
-        for (int i = 0; i < 64; i++) {
-            encoded[last] = STANDARD_ENCODE_TABLE[i];
-            // If the lower bits are set we expect an exception. This is not a valid
-            // final character.
-            if (invalid || (i & emptyBitsMask) != 0) {
-                assertThrows(IllegalArgumentException.class, () -> codec.decode(encoded),
-                        "Final base-64 digit should not be allowed");
-                // The default lenient mode should decode this
-                final byte[] decoded = defaultCodec.decode(encoded);
-                // Re-encoding should not match the original array as it was invalid
-                assertFalse(Arrays.equals(encoded, defaultCodec.encode(decoded)));
-            } else {
-                // Otherwise this should decode
-                final byte[] decoded = codec.decode(encoded);
-                // Compute the bits that were encoded. This should match the final decoded byte.
-                final int bitsEncoded = i >> discard;
-                assertEquals(bitsEncoded, decoded[decoded.length - 1], "Invalid decoding of last character");
-                // Re-encoding should match the original array (requires the same padding character)
-                assertArrayEquals(encoded, codec.encode(decoded));
-            }
-        }
-    }
-
-    /**
-     * Test for CODEC-265: Encode a 1GiB file.
-     *
-     * @see <a href="https://issues.apache.org/jira/projects/CODEC/issues/CODEC-265">CODEC-265</a>
-     */
-    @Test
-    public void testCodec265() {
-        // 1GiB file to encode: 2^30 bytes
-        final int size1GiB = 1 << 30;
-
-        // Expecting a size of 4 output bytes per 3 input bytes plus the trailing bytes
-        // padded to a block size of 4.
-        final int blocks = (int) Math.ceil(size1GiB / 3.0);
-        final int expectedLength = 4 * blocks;
-
-        // This test is memory hungry. Check we can run it.
-        final long presumableFreeMemory = BaseNCodecTest.getPresumableFreeMemory();
-
-        // Estimate the maximum memory required:
-        // 1GiB + 1GiB + ~2GiB + ~1.33GiB + 32 KiB  = ~5.33GiB
-        //
-        // 1GiB: Input buffer to encode
-        // 1GiB: Existing working buffer (due to doubling of default buffer size of 8192)
-        // ~2GiB: New working buffer to allocate (due to doubling)
-        // ~1.33GiB: Expected output size (since the working buffer is copied at the end)
-        // 32KiB: Some headroom
-        final long estimatedMemory = (long) size1GiB * 4 + expectedLength + 32 * 1024;
-        Assumptions.assumeTrue(presumableFreeMemory > estimatedMemory,
-                "Not enough free memory for the test");
-
-        final byte[] bytes = new byte[size1GiB];
-        final byte[] encoded = Base64.encodeBase64(bytes);
-        assertEquals(expectedLength, encoded.length);
     }
 }

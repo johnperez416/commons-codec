@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,12 @@
  */
 package org.apache.commons.codec.digest;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -35,22 +36,23 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Tests {@link MessageDigestAlgorithms}.
- *
- * @since 1.11
  */
 public class MessageDigestAlgorithmsTest {
 
     @BeforeAll
     public static void checkValues() throws Exception {
-        final Field [] fields = MessageDigestAlgorithms.class.getDeclaredFields();
+        final Field[] fields = MessageDigestAlgorithms.class.getDeclaredFields();
         boolean ok = true;
         int psf = 0;
-        for(final Field f : fields) {
+        for (final Field f : fields) {
             // Ignore cobertura instrumentation fields
             if (f.getName().contains("cobertura")) {
                 continue;
@@ -61,7 +63,7 @@ public class MessageDigestAlgorithmsTest {
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
                 psf++;
                 if (!contains((String) f.get(null))) {
-                    System.out.println("Not found in MessageDigestAlgorithms.values(): "+f.getName());
+                    System.out.println("Not found in MessageDigestAlgorithms.values(): " + f.getName());
                     ok = false;
                 }
             }
@@ -75,7 +77,7 @@ public class MessageDigestAlgorithmsTest {
     }
 
     private static boolean contains(final String key) {
-        for(final String s : MessageDigestAlgorithms.values()) {
+        for (final String s : MessageDigestAlgorithms.values()) {
             if (s.equals(key)) {
                 return true;
             }
@@ -90,7 +92,7 @@ public class MessageDigestAlgorithmsTest {
     private DigestUtilsTest digestUtilsTest;
 
     private byte[] digestTestData(final String messageDigestAlgorithm) {
-        return DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm),getTestData());
+        return DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestData());
     }
 
     private byte[] getTestData() {
@@ -98,7 +100,7 @@ public class MessageDigestAlgorithmsTest {
     }
 
     private File getTestFile() {
-        return digestUtilsTest.getTestFile();
+        return digestUtilsTest.getTestPath().toFile();
     }
 
     private Path getTestPath() {
@@ -135,9 +137,8 @@ public class MessageDigestAlgorithmsTest {
     @MethodSource("data")
     public void testDigestByteArray(final String messageDigestAlgorithm) {
         assumeTrue(DigestUtils.isAvailable(messageDigestAlgorithm));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm),
-                DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestData()));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm),getTestData()));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestData()));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestData()));
     }
 
     @ParameterizedTest
@@ -146,17 +147,16 @@ public class MessageDigestAlgorithmsTest {
         assumeTrue(DigestUtils.isAvailable(messageDigestAlgorithm));
         assertArrayEquals(digestTestData(messageDigestAlgorithm),
                 DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), ByteBuffer.wrap(getTestData())));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm),ByteBuffer.wrap(getTestData())));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm),
+                DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), ByteBuffer.wrap(getTestData())));
     }
 
     @ParameterizedTest
     @MethodSource("data")
     public void testDigestFile(final String messageDigestAlgorithm) throws IOException {
         assumeTrue(DigestUtils.isAvailable(messageDigestAlgorithm));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm),
-            DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestFile()));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm),
-            DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestFile()));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestFile()));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestFile()));
     }
 
     @ParameterizedTest
@@ -165,17 +165,16 @@ public class MessageDigestAlgorithmsTest {
         assumeTrue(DigestUtils.isAvailable(messageDigestAlgorithm));
         assertArrayEquals(digestTestData(messageDigestAlgorithm),
                 DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), new ByteArrayInputStream(getTestData())));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm),new ByteArrayInputStream(getTestData())));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm),
+                DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), new ByteArrayInputStream(getTestData())));
     }
 
     @ParameterizedTest
     @MethodSource("data")
     private void testDigestPath(final String messageDigestAlgorithm, final OpenOption... options) throws IOException {
         assumeTrue(DigestUtils.isAvailable(messageDigestAlgorithm));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm),
-            DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestPath(), options));
-        assertArrayEquals(digestTestData(messageDigestAlgorithm),
-            DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestPath(), options));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestPath(), options));
+        assertArrayEquals(digestTestData(messageDigestAlgorithm), DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), getTestPath(), options));
     }
 
     @ParameterizedTest
@@ -205,17 +204,11 @@ public class MessageDigestAlgorithmsTest {
 
         final byte[] expected = digestTestData(messageDigestAlgorithm);
 
-        assertArrayEquals(expected,
-                DigestUtils.digest(
-                        DigestUtils.getDigest(messageDigestAlgorithm), getTestRandomAccessFile()
-                )
-        );
-        getTestRandomAccessFile().seek(0);
-        assertArrayEquals(expected,
-                DigestUtils.digest(
-                        DigestUtils.getDigest(messageDigestAlgorithm), getTestRandomAccessFile()
-                )
-        );
+        @SuppressWarnings("resource") // test manages RAF
+        final RandomAccessFile randomAccessFile = getTestRandomAccessFile();
+        assertArrayEquals(expected, DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), randomAccessFile));
+        randomAccessFile.seek(0);
+        assertArrayEquals(expected, DigestUtils.digest(DigestUtils.getDigest(messageDigestAlgorithm), randomAccessFile));
     }
 
 }

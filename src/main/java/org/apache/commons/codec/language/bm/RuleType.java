@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +24,19 @@ package org.apache.commons.codec.language.bm;
  */
 public enum RuleType {
 
-    /** Approximate rules, which will lead to the largest number of phonetic interpretations. */
+    /**
+     * Approximate rules, which will lead to the largest number of phonetic interpretations.
+     */
     APPROX("approx"),
-    /** Exact rules, which will lead to a minimum number of phonetic interpretations. */
+
+    /**
+     * Exact rules, which will lead to a minimum number of phonetic interpretations.
+     */
     EXACT("exact"),
-    /** For internal use only. Please use {@link #APPROX} or {@link #EXACT}. */
+
+    /**
+     * For internal use only. Please use {@link #APPROX} or {@link #EXACT}.
+     */
     RULES("rules");
 
     private final String name;

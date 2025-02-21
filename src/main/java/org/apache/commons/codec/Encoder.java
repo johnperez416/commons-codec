@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ package org.apache.commons.codec;
  * This is the sister interface of {@link Decoder}.  Every implementation of Encoder provides this
  * common generic interface which allows a user to pass a generic Object to any Encoder implementation
  * in the codec package.
- *
+ * </p>
  */
 public interface Encoder {
 

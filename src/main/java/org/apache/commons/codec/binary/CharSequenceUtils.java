@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,8 +32,10 @@ public class CharSequenceUtils {
     /**
      * Green implementation of regionMatches.
      *
-     * <p>Note: This function differs from the current implementation in Apache Commons Lang
+     * <p>
+     * Note: This function differs from the current implementation in Apache Commons Lang
      * where the input indices are not valid. It is only used within this package.
+     * </p>
      *
      * @param cs
      *            the {@code CharSequence} to be processed
@@ -57,26 +59,31 @@ public class CharSequenceUtils {
         int index1 = thisStart;
         int index2 = start;
         int tmpLen = length;
-
         while (tmpLen-- > 0) {
             final char c1 = cs.charAt(index1++);
             final char c2 = substring.charAt(index2++);
-
             if (c1 == c2) {
                 continue;
             }
-
             if (!ignoreCase) {
                 return false;
             }
-
             // The same check as in String.regionMatches():
             if (Character.toUpperCase(c1) != Character.toUpperCase(c2) &&
                     Character.toLowerCase(c1) != Character.toLowerCase(c2)) {
                 return false;
             }
         }
-
         return true;
+    }
+
+    /**
+     * Consider private.
+     *
+     * @deprecated Will be private in the next major version.
+     */
+    @Deprecated
+    public CharSequenceUtils() {
+        // empty
     }
 }

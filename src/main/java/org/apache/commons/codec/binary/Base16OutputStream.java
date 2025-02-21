@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,12 @@
 
 package org.apache.commons.codec.binary;
 
-import org.apache.commons.codec.CodecPolicy;
-
 import java.io.OutputStream;
 
+import org.apache.commons.codec.CodecPolicy;
+
 /**
- * Provides Hex encoding and decoding in a streaming fashion (unlimited size).
+ * Provides Hex encoding in a streaming fashion (unlimited size).
  * <p>
  * The default behavior of the HexOutputStream is to ENCODE, whereas the default behavior of the
  * {@link Base16InputStream} is to DECODE. But this behavior can be overridden by using a different constructor.
@@ -33,7 +33,7 @@ import java.io.OutputStream;
 public class Base16OutputStream extends BaseNCodecOutputStream {
 
     /**
-     * Creates a Base16OutputStream such that all data written is Hex-encoded to the original provided OutputStream.
+     * Constructs a Base16OutputStream such that all data written is Hex-encoded to the original provided OutputStream.
      *
      * @param outputStream OutputStream to wrap.
      */
@@ -42,7 +42,7 @@ public class Base16OutputStream extends BaseNCodecOutputStream {
     }
 
     /**
-     * Creates a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
+     * Constructs a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
      * original provided OutputStream.
      *
      * @param outputStream OutputStream to wrap.
@@ -53,7 +53,7 @@ public class Base16OutputStream extends BaseNCodecOutputStream {
     }
 
     /**
-     * Creates a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
+     * Constructs a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
      * original provided OutputStream.
      *
      * @param outputStream OutputStream to wrap.
@@ -65,7 +65,7 @@ public class Base16OutputStream extends BaseNCodecOutputStream {
     }
 
     /**
-     * Creates a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
+     * Constructs a Base16OutputStream such that all data written is either Hex-encoded or Hex-decoded to the
      * original provided OutputStream.
      *
      * @param outputStream OutputStream to wrap.

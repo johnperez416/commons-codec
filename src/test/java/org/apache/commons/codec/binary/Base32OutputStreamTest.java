@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,21 +17,25 @@
 
 package org.apache.commons.codec.binary;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.codec.CodecPolicy;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+/**
+ * Tests {@link Base32OutputStream}.
+ */
 public class Base32OutputStreamTest {
 
-    private final static byte[] CR_LF = {(byte) '\r', (byte) '\n'};
+    private static final byte[] CR_LF = {(byte) '\r', (byte) '\n'};
 
-    private final static byte[] LF = {(byte) '\n'};
-
-
+    private static final byte[] LF = {(byte) '\n'};
 
 //    /**
 //     * Test the Base32OutputStream implementation against the special NPE inducing input
@@ -56,6 +60,12 @@ public class Base32OutputStreamTest {
 //        );
 //    }
 
+    private void testBase32EmptyOutputStream(final int chunkSize) throws Exception {
+        final byte[] emptyEncoded = {};
+        final byte[] emptyDecoded = {};
+        testByteByByte(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
+        testByChunk(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
+    }
 
     /**
      * Test the Base32OutputStream implementation against empty input.
@@ -79,13 +89,6 @@ public class Base32OutputStreamTest {
         testBase32EmptyOutputStream(BaseNCodec.PEM_CHUNK_SIZE);
     }
 
-    private void testBase32EmptyOutputStream(final int chunkSize) throws Exception {
-        final byte[] emptyEncoded = {};
-        final byte[] emptyDecoded = {};
-        testByteByByte(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
-        testByChunk(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
-    }
-
     /**
      * Test the Base32OutputStream implementation
      *
@@ -103,7 +106,6 @@ public class Base32OutputStreamTest {
 //        encoded = StringUtils.getBytesUtf8("AA==\r\n");
 //        decoded = new byte[]{(byte) 0};
 //        testByChunk(encoded, decoded, Base32.MIME_CHUNK_SIZE, CRLF);
-
 
 //        // Single Line test.
 //        String singleLine = Base32TestData.ENCODED_64_CHARS_PER_LINE.replaceAll("\n", "");
@@ -138,7 +140,6 @@ public class Base32OutputStreamTest {
 //        encoded = StringUtils.getBytesUtf8("AA==\r\n");
 //        decoded = new byte[]{(byte) 0};
 //        testByteByByte(encoded, decoded, 76, CRLF);
-
 
 //        // Single Line test.
 //        String singleLine = Base32TestData.ENCODED_64_CHARS_PER_LINE.replaceAll("\n", "");
@@ -178,23 +179,23 @@ public class Base32OutputStreamTest {
 
         // Start with encode.
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        OutputStream out = new Base32OutputStream(byteOut, true, chunkSize, separator);
-        out.write(decoded);
-        out.close();
+        try (OutputStream out = new Base32OutputStream(byteOut, true, chunkSize, separator)) {
+            out.write(decoded);
+        }
         byte[] output = byteOut.toByteArray();
         assertArrayEquals(encoded, output, "Streaming chunked Base32 encode");
 
         // Now let's try to decode.
         byteOut = new ByteArrayOutputStream();
-        out = new Base32OutputStream(byteOut, false);
-        out.write(encoded);
-        out.close();
+        try (OutputStream out = new Base32OutputStream(byteOut, false)) {
+            out.write(encoded);
+        }
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming chunked Base32 decode");
 
         // I always wanted to do this! (wrap encoder with decoder etc.).
         byteOut = new ByteArrayOutputStream();
-        out = byteOut;
+        OutputStream out = byteOut;
         for (int i = 0; i < 10; i++) {
             out = new Base32OutputStream(out, false);
             out = new Base32OutputStream(out, true, chunkSize, separator);
@@ -228,38 +229,38 @@ public class Base32OutputStreamTest {
 
         // Start with encode.
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        OutputStream out = new Base32OutputStream(byteOut, true, chunkSize, separator);
-        for (final byte element : decoded) {
-            out.write(element);
+        try (OutputStream out = new Base32OutputStream(byteOut, true, chunkSize, separator)) {
+            for (final byte element : decoded) {
+                out.write(element);
+            }
         }
-        out.close();
         byte[] output = byteOut.toByteArray();
         assertArrayEquals(encoded, output, "Streaming byte-by-byte Base32 encode");
 
         // Now let's try to decode.
         byteOut = new ByteArrayOutputStream();
-        out = new Base32OutputStream(byteOut, false);
-        for (final byte element : encoded) {
-            out.write(element);
+        try (OutputStream out = new Base32OutputStream(byteOut, false)) {
+            for (final byte element : encoded) {
+                out.write(element);
+            }
         }
-        out.close();
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming byte-by-byte Base32 decode");
 
         // Now let's try to decode with tonnes of flushes.
         byteOut = new ByteArrayOutputStream();
-        out = new Base32OutputStream(byteOut, false);
-        for (final byte element : encoded) {
-            out.write(element);
-            out.flush();
+        try (OutputStream out = new Base32OutputStream(byteOut, false)) {
+            for (final byte element : encoded) {
+                out.write(element);
+                out.flush();
+            }
         }
-        out.close();
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming byte-by-byte flush() Base32 decode");
 
         // I always wanted to do this! (wrap encoder with decoder etc.).
         byteOut = new ByteArrayOutputStream();
-        out = byteOut;
+        OutputStream out = byteOut;
         for (int i = 0; i < 10; i++) {
             out = new Base32OutputStream(out, false);
             out = new Base32OutputStream(out, true, chunkSize, separator);
@@ -271,38 +272,6 @@ public class Base32OutputStreamTest {
         output = byteOut.toByteArray();
 
         assertArrayEquals(decoded, output, "Streaming byte-by-byte Base32 wrap-wrap-wrap!");
-    }
-
-    /**
-     * Tests Base32OutputStream.write for expected IndexOutOfBoundsException conditions.
-     *
-     * @throws Exception
-     *             for some failure scenarios.
-     */
-    @Test
-    public void testWriteOutOfBounds() throws Exception {
-        final byte[] buf = new byte[1024];
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try (final Base32OutputStream out = new Base32OutputStream(bout)) {
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, -1, 1), "Base32OutputStream.write(buf, -1, 1)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, 1, -1), "Base32OutputStream.write(buf, 1, -1)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length + 1, 0), "Base32OutputStream.write(buf, buf, buf.length + 1, 0)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length - 1, 2), "Base32OutputStream.write(buf, buf, buf.length - 1, 2)");
-        }
-    }
-
-    /**
-     * Tests Base32OutputStream.write(null).
-     *
-     * @throws Exception
-     *             for some failure scenarios.
-     */
-    @Test
-    public void testWriteToNullCoverage() throws Exception {
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try (final Base32OutputStream out = new Base32OutputStream(bout)) {
-            assertThrows(NullPointerException.class, () -> out.write(null, 0, 0));
-        }
     }
 
     /**
@@ -325,11 +294,43 @@ public class Base32OutputStreamTest {
 
                 // Strict decoding should throw
                 bout = new ByteArrayOutputStream();
-                try (final Base32OutputStream out2 = new Base32OutputStream(bout, false, 0, null, CodecPolicy.STRICT)) {
+                try (Base32OutputStream out2 = new Base32OutputStream(bout, false, 0, null, CodecPolicy.STRICT)) {
                     assertTrue(out2.isStrictDecoding());
                     assertThrows(IllegalArgumentException.class, () -> out2.write(encoded));
                 }
             }
+        }
+    }
+
+    /**
+     * Tests Base32OutputStream.write for expected IndexOutOfBoundsException conditions.
+     *
+     * @throws Exception
+     *             for some failure scenarios.
+     */
+    @Test
+    public void testWriteOutOfBounds() throws Exception {
+        final byte[] buf = new byte[1024];
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try (Base32OutputStream out = new Base32OutputStream(bout)) {
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, -1, 1), "Base32OutputStream.write(buf, -1, 1)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, 1, -1), "Base32OutputStream.write(buf, 1, -1)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length + 1, 0), "Base32OutputStream.write(buf, buf, buf.length + 1, 0)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length - 1, 2), "Base32OutputStream.write(buf, buf, buf.length - 1, 2)");
+        }
+    }
+
+    /**
+     * Tests Base32OutputStream.write(null).
+     *
+     * @throws Exception
+     *             for some failure scenarios.
+     */
+    @Test
+    public void testWriteToNullCoverage() throws Exception {
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try (Base32OutputStream out = new Base32OutputStream(bout)) {
+            assertThrows(NullPointerException.class, () -> out.write(null, 0, 0));
         }
     }
 }

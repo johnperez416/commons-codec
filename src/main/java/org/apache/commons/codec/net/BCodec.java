@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ package org.apache.commons.codec.net;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 
 import org.apache.commons.codec.CodecPolicy;
 import org.apache.commons.codec.DecoderException;
@@ -54,11 +55,6 @@ public class BCodec extends RFC1522Codec implements StringEncoder, StringDecoder
     private static final CodecPolicy DECODING_POLICY_DEFAULT = CodecPolicy.LENIENT;
 
     /**
-     * The default Charset used for string decoding and encoding.
-     */
-    private final Charset charset;
-
-    /**
      * If true then decoding should throw an exception for impossible combinations of bits at the
      * end of the byte input. The default is to decode as much of them as possible.
      */
@@ -77,7 +73,7 @@ public class BCodec extends RFC1522Codec implements StringEncoder, StringDecoder
      * @param charset
      *            the default string Charset to use.
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      * @since 1.7
      */
     public BCodec(final Charset charset) {
@@ -90,12 +86,11 @@ public class BCodec extends RFC1522Codec implements StringEncoder, StringDecoder
      * @param charset
      *            the default string Charset to use.
      * @param decodingPolicy The decoding policy.
-     *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      * @since 1.15
      */
     public BCodec(final Charset charset, final CodecPolicy decodingPolicy) {
-        this.charset = charset;
+        super(charset);
         this.decodingPolicy = decodingPolicy;
     }
 
@@ -107,147 +102,10 @@ public class BCodec extends RFC1522Codec implements StringEncoder, StringDecoder
      * @throws java.nio.charset.UnsupportedCharsetException
      *             If the named Charset is unavailable
      * @since 1.7 throws UnsupportedCharsetException if the named Charset is unavailable
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
     public BCodec(final String charsetName) {
         this(Charset.forName(charsetName));
-    }
-
-    /**
-     * Returns true if decoding behavior is strict. Decoding will raise a
-     * {@link DecoderException} if trailing bits are not part of a valid Base64 encoding.
-     *
-     * <p>The default is false for lenient encoding. Decoding will compose trailing bits
-     * into 8-bit bytes and discard the remainder.
-     *
-     * @return true if using strict decoding
-     * @since 1.15
-     */
-    public boolean isStrictDecoding() {
-        return decodingPolicy == CodecPolicy.STRICT;
-    }
-
-    @Override
-    protected String getEncoding() {
-        return "B";
-    }
-
-    @Override
-    protected byte[] doEncoding(final byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        return Base64.encodeBase64(bytes);
-    }
-
-    @Override
-    protected byte[] doDecoding(final byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        return new Base64(0, BaseNCodec.getChunkSeparator(), false, decodingPolicy).decode(bytes);
-    }
-
-    /**
-     * Encodes a string into its Base64 form using the specified Charset. Unsafe characters are escaped.
-     *
-     * @param strSource
-     *            string to convert to Base64 form
-     * @param sourceCharset
-     *            the Charset for {@code value}
-     * @return Base64 string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     * @since 1.7
-     */
-    public String encode(final String strSource, final Charset sourceCharset) throws EncoderException {
-        if (strSource == null) {
-            return null;
-        }
-        return encodeText(strSource, sourceCharset);
-    }
-
-    /**
-     * Encodes a string into its Base64 form using the specified Charset. Unsafe characters are escaped.
-     *
-     * @param strSource
-     *            string to convert to Base64 form
-     * @param sourceCharset
-     *            the Charset for {@code value}
-     * @return Base64 string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     */
-    public String encode(final String strSource, final String sourceCharset) throws EncoderException {
-        if (strSource == null) {
-            return null;
-        }
-        try {
-            return this.encodeText(strSource, sourceCharset);
-        } catch (final UnsupportedEncodingException e) {
-            throw new EncoderException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Encodes a string into its Base64 form using the default Charset. Unsafe characters are escaped.
-     *
-     * @param strSource
-     *            string to convert to Base64 form
-     * @return Base64 string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     */
-    @Override
-    public String encode(final String strSource) throws EncoderException {
-        if (strSource == null) {
-            return null;
-        }
-        return encode(strSource, this.getCharset());
-    }
-
-    /**
-     * Decodes a Base64 string into its original form. Escaped characters are converted back to their original
-     * representation.
-     *
-     * @param value
-     *            Base64 string to convert into its original form
-     * @return original string
-     * @throws DecoderException
-     *             A decoder exception is thrown if a failure condition is encountered during the decode process.
-     */
-    @Override
-    public String decode(final String value) throws DecoderException {
-        if (value == null) {
-            return null;
-        }
-        try {
-            return this.decodeText(value);
-        } catch (final UnsupportedEncodingException | IllegalArgumentException e) {
-            throw new DecoderException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Encodes an object into its Base64 form using the default Charset. Unsafe characters are escaped.
-     *
-     * @param value
-     *            object to convert to Base64 form
-     * @return Base64 object
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     */
-    @Override
-    public Object encode(final Object value) throws EncoderException {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof String) {
-            return encode((String) value);
-        }
-        throw new EncoderException("Objects of type " +
-              value.getClass().getName() +
-              " cannot be encoded using BCodec");
     }
 
     /**
@@ -269,27 +127,129 @@ public class BCodec extends RFC1522Codec implements StringEncoder, StringDecoder
         if (value instanceof String) {
             return decode((String) value);
         }
-        throw new DecoderException("Objects of type " +
-              value.getClass().getName() +
-              " cannot be decoded using BCodec");
+        throw new DecoderException("Objects of type " + value.getClass().getName() + " cannot be decoded using BCodec");
     }
 
     /**
-     * Gets the default Charset name used for string decoding and encoding.
+     * Decodes a Base64 string into its original form. Escaped characters are converted back to their original
+     * representation.
      *
-     * @return the default Charset name
+     * @param value
+     *            Base64 string to convert into its original form
+     * @return original string
+     * @throws DecoderException
+     *             A decoder exception is thrown if a failure condition is encountered during the decode process.
+     */
+    @Override
+    public String decode(final String value) throws DecoderException {
+        try {
+            return decodeText(value);
+        } catch (final UnsupportedEncodingException | IllegalArgumentException e) {
+            throw new DecoderException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected byte[] doDecoding(final byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        return new Base64(0, BaseNCodec.getChunkSeparator(), false, decodingPolicy).decode(bytes);
+    }
+
+    @Override
+    protected byte[] doEncoding(final byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        return Base64.encodeBase64(bytes);
+    }
+
+    /**
+     * Encodes an object into its Base64 form using the default Charset. Unsafe characters are escaped.
+     *
+     * @param value
+     *            object to convert to Base64 form
+     * @return Base64 object
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
+     */
+    @Override
+    public Object encode(final Object value) throws EncoderException {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String) {
+            return encode((String) value);
+        }
+        throw new EncoderException("Objects of type " + value.getClass().getName() + " cannot be encoded using BCodec");
+    }
+
+    /**
+     * Encodes a string into its Base64 form using the default Charset. Unsafe characters are escaped.
+     *
+     * @param strSource
+     *            string to convert to Base64 form
+     * @return Base64 string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
+     */
+    @Override
+    public String encode(final String strSource) throws EncoderException {
+        return encode(strSource, getCharset());
+    }
+
+    /**
+     * Encodes a string into its Base64 form using the specified Charset. Unsafe characters are escaped.
+     *
+     * @param strSource
+     *            string to convert to Base64 form
+     * @param sourceCharset
+     *            the Charset for {@code value}
+     * @return Base64 string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
      * @since 1.7
      */
-    public Charset getCharset() {
-        return this.charset;
+    public String encode(final String strSource, final Charset sourceCharset) throws EncoderException {
+        return encodeText(strSource, sourceCharset);
     }
 
     /**
-     * Gets the default Charset name used for string decoding and encoding.
+     * Encodes a string into its Base64 form using the specified Charset. Unsafe characters are escaped.
      *
-     * @return the default Charset name
+     * @param strSource
+     *            string to convert to Base64 form
+     * @param sourceCharset
+     *            the Charset for {@code value}
+     * @return Base64 string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
      */
-    public String getDefaultCharset() {
-        return this.charset.name();
+    public String encode(final String strSource, final String sourceCharset) throws EncoderException {
+        try {
+            return encodeText(strSource, sourceCharset);
+        } catch (final UnsupportedCharsetException e) {
+            throw new EncoderException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected String getEncoding() {
+        return "B";
+    }
+
+    /**
+     * Returns true if decoding behavior is strict. Decoding will raise a
+     * {@link DecoderException} if trailing bits are not part of a valid Base64 encoding.
+     *
+     * <p>The default is false for lenient encoding. Decoding will compose trailing bits
+     * into 8-bit bytes and discard the remainder.
+     *
+     * @return true if using strict decoding
+     * @since 1.15
+     */
+    public boolean isStrictDecoding() {
+        return decodingPolicy == CodecPolicy.STRICT;
     }
 }

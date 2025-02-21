@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ package org.apache.commons.codec.net;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.BitSet;
 
 import org.apache.commons.codec.DecoderException;
@@ -39,8 +40,8 @@ import org.apache.commons.codec.StringEncoder;
  * <p>
  * This class is conditionally thread-safe.
  * The instance field for encoding blanks is mutable {@link #setEncodeBlanks(boolean)}
- * but is not volatile, and accesses are not synchronised.
- * If an instance of the class is shared between threads, the caller needs to ensure that suitable synchronisation
+ * but is not volatile, and accesses are not synchronized.
+ * If an instance of the class is shared between threads, the caller needs to ensure that suitable synchronization
  * is used to ensure safe publication of the value between threads, and must not invoke
  * {@link #setEncodeBlanks(boolean)} after initial setup.
  * </p>
@@ -52,14 +53,10 @@ import org.apache.commons.codec.StringEncoder;
  */
 public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder {
     /**
-     * The default Charset used for string decoding and encoding.
-     */
-    private final Charset charset;
-
-    /**
      * BitSet of printable characters as defined in RFC 1522.
      */
     private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+
     // Static initializer for printable chars collection
     static {
         // alpha characters
@@ -103,12 +100,11 @@ public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder
         PRINTABLE_CHARS.set('}');
         PRINTABLE_CHARS.set('~');
     }
-
     private static final byte SPACE = 32;
 
     private static final byte UNDERSCORE = 95;
 
-    private boolean encodeBlanks = false;
+    private boolean encodeBlanks;
 
     /**
      * Default constructor.
@@ -123,11 +119,11 @@ public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder
      * @param charset
      *            the default string Charset to use.
      *
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      * @since 1.7
      */
     public QCodec(final Charset charset) {
-        this.charset = charset;
+        super(charset);
     }
 
     /**
@@ -138,31 +134,51 @@ public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder
      * @throws java.nio.charset.UnsupportedCharsetException
      *             If the named Charset is unavailable
      * @since 1.7 throws UnsupportedCharsetException if the named Charset is unavailable
-     * @see <a href="http://download.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
+     * @see Charset
      */
     public QCodec(final String charsetName) {
         this(Charset.forName(charsetName));
     }
 
+    /**
+     * Decodes a quoted-printable object into its original form. Escaped characters are converted back to their original
+     * representation.
+     *
+     * @param obj
+     *            quoted-printable object to convert into its original form
+     * @return original object
+     * @throws DecoderException
+     *             Thrown if the argument is not a {@code String}. Thrown if a failure condition is encountered
+     *             during the decode process.
+     */
     @Override
-    protected String getEncoding() {
-        return "Q";
-    }
-
-    @Override
-    protected byte[] doEncoding(final byte[] bytes) {
-        if (bytes == null) {
+    public Object decode(final Object obj) throws DecoderException {
+        if (obj == null) {
             return null;
         }
-        final byte[] data = QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, bytes);
-        if (this.encodeBlanks) {
-            for (int i = 0; i < data.length; i++) {
-                if (data[i] == SPACE) {
-                    data[i] = UNDERSCORE;
-                }
-            }
+        if (obj instanceof String) {
+            return decode((String) obj);
         }
-        return data;
+        throw new DecoderException("Objects of type " + obj.getClass().getName() + " cannot be decoded using Q codec");
+    }
+
+    /**
+     * Decodes a quoted-printable string into its original form. Escaped characters are converted back to their original
+     * representation.
+     *
+     * @param str
+     *            quoted-printable string to convert into its original form
+     * @return original string
+     * @throws DecoderException
+     *             A decoder exception is thrown if a failure condition is encountered during the decode process.
+     */
+    @Override
+    public String decode(final String str) throws DecoderException {
+        try {
+            return decodeText(str);
+        } catch (final UnsupportedEncodingException e) {
+            throw new DecoderException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -192,84 +208,20 @@ public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder
         return QuotedPrintableCodec.decodeQuotedPrintable(bytes);
     }
 
-    /**
-     * Encodes a string into its quoted-printable form using the specified Charset. Unsafe characters are escaped.
-     *
-     * @param sourceStr
-     *            string to convert to quoted-printable form
-     * @param sourceCharset
-     *            the Charset for sourceStr
-     * @return quoted-printable string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     * @since 1.7
-     */
-    public String encode(final String sourceStr, final Charset sourceCharset) throws EncoderException {
-        if (sourceStr == null) {
-            return null;
-        }
-        return encodeText(sourceStr, sourceCharset);
-    }
-
-    /**
-     * Encodes a string into its quoted-printable form using the specified Charset. Unsafe characters are escaped.
-     *
-     * @param sourceStr
-     *            string to convert to quoted-printable form
-     * @param sourceCharset
-     *            the Charset for sourceStr
-     * @return quoted-printable string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     */
-    public String encode(final String sourceStr, final String sourceCharset) throws EncoderException {
-        if (sourceStr == null) {
-            return null;
-        }
-        try {
-            return encodeText(sourceStr, sourceCharset);
-        } catch (final UnsupportedEncodingException e) {
-            throw new EncoderException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Encodes a string into its quoted-printable form using the default Charset. Unsafe characters are escaped.
-     *
-     * @param sourceStr
-     *            string to convert to quoted-printable form
-     * @return quoted-printable string
-     * @throws EncoderException
-     *             thrown if a failure condition is encountered during the encoding process.
-     */
     @Override
-    public String encode(final String sourceStr) throws EncoderException {
-        if (sourceStr == null) {
+    protected byte[] doEncoding(final byte[] bytes) {
+        if (bytes == null) {
             return null;
         }
-        return encode(sourceStr, getCharset());
-    }
-
-    /**
-     * Decodes a quoted-printable string into its original form. Escaped characters are converted back to their original
-     * representation.
-     *
-     * @param str
-     *            quoted-printable string to convert into its original form
-     * @return original string
-     * @throws DecoderException
-     *             A decoder exception is thrown if a failure condition is encountered during the decode process.
-     */
-    @Override
-    public String decode(final String str) throws DecoderException {
-        if (str == null) {
-            return null;
+        final byte[] data = QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, bytes);
+        if (this.encodeBlanks) {
+            for (int i = 0; i < data.length; i++) {
+                if (data[i] == SPACE) {
+                    data[i] = UNDERSCORE;
+                }
+            }
         }
-        try {
-            return decodeText(str);
-        } catch (final UnsupportedEncodingException e) {
-            throw new DecoderException(e.getMessage(), e);
-        }
+        return data;
     }
 
     /**
@@ -289,52 +241,61 @@ public class QCodec extends RFC1522Codec implements StringEncoder, StringDecoder
         if (obj instanceof String) {
             return encode((String) obj);
         }
-        throw new EncoderException("Objects of type " +
-              obj.getClass().getName() +
-              " cannot be encoded using Q codec");
+        throw new EncoderException("Objects of type " + obj.getClass().getName() + " cannot be encoded using Q codec");
     }
 
     /**
-     * Decodes a quoted-printable object into its original form. Escaped characters are converted back to their original
-     * representation.
+     * Encodes a string into its quoted-printable form using the default Charset. Unsafe characters are escaped.
      *
-     * @param obj
-     *            quoted-printable object to convert into its original form
-     * @return original object
-     * @throws DecoderException
-     *             Thrown if the argument is not a {@code String}. Thrown if a failure condition is encountered
-     *             during the decode process.
+     * @param sourceStr
+     *            string to convert to quoted-printable form
+     * @return quoted-printable string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
      */
     @Override
-    public Object decode(final Object obj) throws DecoderException {
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof String) {
-            return decode((String) obj);
-        }
-        throw new DecoderException("Objects of type " +
-              obj.getClass().getName() +
-              " cannot be decoded using Q codec");
+    public String encode(final String sourceStr) throws EncoderException {
+        return encode(sourceStr, getCharset());
     }
 
     /**
-     * Gets the default Charset name used for string decoding and encoding.
+     * Encodes a string into its quoted-printable form using the specified Charset. Unsafe characters are escaped.
      *
-     * @return the default Charset name
+     * @param sourceStr
+     *            string to convert to quoted-printable form
+     * @param sourceCharset
+     *            the Charset for sourceStr
+     * @return quoted-printable string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
      * @since 1.7
      */
-    public Charset getCharset() {
-        return this.charset;
+    public String encode(final String sourceStr, final Charset sourceCharset) throws EncoderException {
+        return encodeText(sourceStr, sourceCharset);
     }
 
     /**
-     * Gets the default Charset name used for string decoding and encoding.
+     * Encodes a string into its quoted-printable form using the specified Charset. Unsafe characters are escaped.
      *
-     * @return the default Charset name
+     * @param sourceStr
+     *            string to convert to quoted-printable form
+     * @param sourceCharset
+     *            the Charset for sourceStr
+     * @return quoted-printable string
+     * @throws EncoderException
+     *             thrown if a failure condition is encountered during the encoding process.
      */
-    public String getDefaultCharset() {
-        return this.charset.name();
+    public String encode(final String sourceStr, final String sourceCharset) throws EncoderException {
+        try {
+            return encodeText(sourceStr, sourceCharset);
+        } catch (final UnsupportedCharsetException e) {
+            throw new EncoderException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected String getEncoding() {
+        return "Q";
     }
 
     /**

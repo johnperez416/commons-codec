@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,6 +48,8 @@ public class BaseNCodecOutputStream extends FilterOutputStream {
     private final Context context = new Context();
 
     /**
+     * Constructs a new instance.
+     *
      * TODO should this be protected?
      *
      * @param outputStream the underlying output or null.
@@ -82,11 +84,9 @@ public class BaseNCodecOutputStream extends FilterOutputStream {
     /**
      * Writes EOF.
      *
-     * @throws IOException
-     *             if an I/O error occurs.
      * @since 1.11
      */
-    public void eof() throws IOException {
+    public void eof() {
         // Notify encoder of EOF (-1).
         if (doEncode) {
             baseNCodec.encode(singleByte, 0, EOF, context);
@@ -133,8 +133,10 @@ public class BaseNCodecOutputStream extends FilterOutputStream {
      * Returns true if decoding behavior is strict. Decoding will raise an
      * {@link IllegalArgumentException} if trailing bits are not part of a valid encoding.
      *
-     * <p>The default is false for lenient encoding. Decoding will compose trailing bits
+     * <p>
+     * The default is false for lenient encoding. Decoding will compose trailing bits
      * into 8-bit bytes and discard the remainder.
+     * </p>
      *
      * @return true if using strict decoding
      * @since 1.15
@@ -164,10 +166,7 @@ public class BaseNCodecOutputStream extends FilterOutputStream {
     @Override
     public void write(final byte[] array, final int offset, final int len) throws IOException {
         Objects.requireNonNull(array, "array");
-        if (offset < 0 || len < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (offset > array.length || offset + len > array.length) {
+        if (offset < 0 || len < 0 || offset > array.length || offset + len > array.length) {
             throw new IndexOutOfBoundsException();
         }
         if (len > 0) {

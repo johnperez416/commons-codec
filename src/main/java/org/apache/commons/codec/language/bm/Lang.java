@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,20 +36,25 @@ import org.apache.commons.codec.Resources;
  * <p>
  * This class encapsulates rules used to guess the possible languages that a word originates from. This is
  * done by reference to a whole series of rules distributed in resource files.
+ * </p>
  * <p>
  * Instances of this class are typically managed through the static factory method instance().
  * Unless you are developing your own language guessing rules, you will not need to interact with this class directly.
+ * </p>
  * <p>
  * This class is intended to be immutable and thread-safe.
- * <p>
- * <b>Lang resources</b>
+ * </p>
+ * <h2>Lang resources</h2>
  * <p>
  * Language guessing rules are typically loaded from resource files. These are UTF-8 encoded text files.
  * They are systematically named following the pattern:
+ * </p>
  * <blockquote>org/apache/commons/codec/language/bm/lang.txt</blockquote>
+ * <p>
  * The format of these resources is the following:
+ * </p>
  * <ul>
- * <li><b>Rules:</b> whitespace separated strings.
+ * <li><strong>Rules:</strong> whitespace separated strings.
  * There should be 3 columns to each row, and these will be interpreted as:
  * <ol>
  * <li>pattern: a regular expression.</li>
@@ -57,14 +62,15 @@ import org.apache.commons.codec.Resources;
  * <li>acceptOnMatch: 'true' or 'false' indicating if a match rules in or rules out the language.</li>
  * </ol>
  * </li>
- * <li><b>End-of-line comments:</b> Any occurrence of '//' will cause all text following on that line to be
+ * <li><strong>End-of-line comments:</strong> Any occurrence of '//' will cause all text following on that line to be
  * discarded as a comment.</li>
- * <li><b>Multi-line comments:</b> Any line starting with '/*' will start multi-line commenting mode.
+ * <li><strong>Multi-line comments:</strong> Any line starting with '/*' will start multi-line commenting mode.
  * This will skip all content until a line ending in '*' and '/' is found.</li>
- * <li><b>Blank lines:</b> All blank lines will be skipped.</li>
+ * <li><strong>Blank lines:</strong> All blank lines will be skipped.</li>
  * </ul>
  * <p>
  * Port of lang.php
+ * </p>
  *
  * @since 1.6
  */
@@ -95,7 +101,7 @@ public class Lang {
 
     private static final Map<NameType, Lang> LANGS = new EnumMap<>(NameType.class);
 
-    private static final String LANGUAGE_RULES_RN = "org/apache/commons/codec/language/bm/%s_lang.txt";
+    private static final String LANGUAGE_RULES_RN = "/org/apache/commons/codec/language/bm/%s_lang.txt";
 
     static {
         for (final NameType s : NameType.values()) {
@@ -119,6 +125,7 @@ public class Lang {
      * <p>
      * In normal use, you will obtain instances of Lang through the {@link #instance(NameType)} method.
      * You will only need to call this yourself if you are developing custom language mapping rules.
+     * </p>
      *
      * @param languageRulesResourceName
      *            the fully-qualified resource name to load
@@ -128,7 +135,7 @@ public class Lang {
      */
     public static Lang loadFromResource(final String languageRulesResourceName, final Languages languages) {
         final List<LangRule> rules = new ArrayList<>();
-        try (final Scanner scanner = new Scanner(Resources.getInputStream(languageRulesResourceName),
+        try (Scanner scanner = new Scanner(Resources.getInputStream(languageRulesResourceName),
                 ResourceConstants.ENCODING)) {
             boolean inExtendedComment = false;
             while (scanner.hasNextLine()) {
@@ -175,6 +182,7 @@ public class Lang {
     }
 
     private final Languages languages;
+
     private final List<LangRule> rules;
 
     private Lang(final List<LangRule> rules, final Languages languages) {
@@ -203,9 +211,8 @@ public class Lang {
      */
     public Languages.LanguageSet guessLanguages(final String input) {
         final String text = input.toLowerCase(Locale.ENGLISH);
-
         final Set<String> langs = new HashSet<>(this.languages.getLanguages());
-        this.rules.forEach(rule -> {
+        rules.forEach(rule -> {
             if (rule.matches(text)) {
                 if (rule.acceptOnMatch) {
                     langs.retainAll(rule.languages);
@@ -214,7 +221,6 @@ public class Lang {
                 }
             }
         });
-
         final Languages.LanguageSet ls = Languages.LanguageSet.from(langs);
         return ls.equals(Languages.NO_LANGUAGES) ? Languages.ANY_LANGUAGE : ls;
     }

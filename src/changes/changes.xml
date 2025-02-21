@@ -35,14 +35,100 @@ mvn changes:announcement-generate -Prelease-notes [-Dchanges.version=m.n]
 The <action> type attribute can be add,update,fix,remove.
 -->
 
-<document>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <properties>
     <title>Apache Commons Codec Release Notes</title>
     <author>Apache Commons Developers</author>
   </properties>
   <body>
-
-    <release version="1.16" date="TBD" description="Feature and fix release.">
+    <release version="1.18.1" date="YYYY-MM-DD" description="This is a feature and maintenance release. Java 8 or later is required.">
+      <!-- FIX -->
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Remove -nouses directive from maven-bundle-plugin. OSGi package imports now state 'uses' definitions for package imports, this doesn't affect JPMS (from org.apache.commons:commons-parent:80).</action>
+      <!-- ADD -->
+      <!-- UPDATE -->
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 79 to 81.</action>
+    </release>
+    <release version="1.18.0" date="2025-01-24" description="This is a feature and maintenance release. Java 8 or later is required.">
+      <!-- FIX -->
+      <!-- ADD -->
+      <action type="add" dev="ggregory" due-to="Gary Gregory, Julian Reschke">Add Base32.Builder.setHexDecodeTable(boolean).</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory, Julian Reschke">Add Base32.Builder.setHexEncodeTable(boolean).</action>
+      <!-- UPDATE -->
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 78 to 79.</action>
+    </release>
+    <release version="1.17.2" date="2024-12-28" description="This is a feature and maintenance release. Java 8 or later is required.">
+      <!-- FIX -->
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Rewrite DaitchMokotoffSoundex.soundex(String) using String.join().</action>
+      <action type="fix" issue="CODEC-324" dev="ggregory" due-to="Michael Froh">Use Resource.class to load resources, rather than its class loader #353.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Deprecate CharSequenceUtils.CharSequenceUtils().</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Deprecate Sha2Crypt.Sha2Crypt().</action>
+      <!-- ADD -->
+      <!-- UPDATE -->
+      <action type="update" dev="ggregory" due-to="Dependabot">Bump org.apache.commons:commons-lang3 from 3.14.0 to 3.17.0 #296, #305, #313.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 71 to 78 #310, #312, #319, #323, #326, #333.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory, Dependabot">[test] Bump commons-io:commons-io from 2.16.1 to 2.18.0 #318, #341.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory, Dependabot">Bump org.codehaus.mojo:taglist-maven-plugin from 3.1.0 to 3.2.1 #332.</action> 
+    </release>
+    <release version="1.17.1" date="2024-07-12" description="Feature and fix release. Requires a minimum of Java 8.">
+      <!-- FIX -->
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Md5Crypt now throws IllegalArgumentException on an invalid prefix.</action>
+      <!-- ADD -->
+      <!-- UPDATE -->
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 69 to 71 #286.</action>
+      <action               dev="ggregory" type="update" due-to="Dependabot">Bump org.codehaus.mojo:animal-sniffer-maven-plugin from 1.23 to 1.24 #293.</action> 
+      <action               dev="ggregory" type="update" due-to="Dependabot">Bump org.codehaus.mojo:taglist-maven-plugin from 3.0.0 to 3.1.0 #292.</action> 
+    </release>
+    <release version="1.17.0" date="2024-04-20" description="Feature and fix release. Requires a minimum of Java 8.">
+      <!-- FIX -->
+      <action type="fix" issue="CODEC-320" dev="ggregory" due-to="Martin Frydl, Gary Gregory">Wrong output of DoubleMetaphone in 1.16.1.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Optimize memory allocation in PhoneticEngine.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">BCodec and QCodec encode() methods throw UnsupportedCharsetException instead of EncoderException.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Set Javadoc link to latest Java API LTS version.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Base32 constructor fails-fast with a NullPointerException if the custom alphabet array is null.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Base32 constructor makes a defensive copy of the line separator array.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Base64 constructor makes a defensive copy of the line separator array.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Base64 constructor makes a defensive copy of a custom alphabet array.</action>
+      <!-- ADD -->
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add override org.apache.commons.codec.language.bm.Rule.PhonemeExpr.size().</action>
+      <action type="add" dev="ggregory" due-to="Chris Kocel, Gary Gregory">Add support for Base64 custom alphabets #266.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add Base64.Builder (allows custom alphabets).</action> 
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add Base32.Builder (allows custom alphabets).</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add Base64 support for a custom padding byte (like Base32).</action> 
+      <!-- UPDATE -->
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump org.apache.commons:commons-parent from 66 to 69 #250, #261.</action>
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump commons-io:commons-io from 2.15.1 to 2.16.1 #258, #265.</action>
+    </release>
+    <release version="1.16.1" date="2024-02-04" description="Feature and fix release. Requires a minimum of Java 8.">
+      <!-- ADD -->
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add Maven property project.build.outputTimestamp for build reproducibility.</action>
+      <!-- FIX -->
+      <action issue="CODEC-295" dev="ggregory" type="fix" due-to="Gary Gregory">Test clean ups.</action>
+      <action                   dev="ggregory" type="fix" due-to="step-security-bot, Gary Gregory">[StepSecurity] ci: Harden GitHub Actions #187.</action>
+      <action issue="CODEC-295" dev="ggregory" type="fix" due-to="Evan Saulpaugh">Correct error in Base64 Javadoc #188.</action>
+      <action issue="CODEC-295" dev="ggregory" type="fix" due-to="Olivier Jaquemet, Gary Gregory">Add minimum Java version in changes.xml #186.</action>
+      <action issue="CODEC-310" dev="ggregory" type="fix" due-to="Yakov Shafranovich">Documentation update for the org.apache.commons.codec.digest.* package #208.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Precompile regular expression in UnixCrypt.crypt(byte[], String).</action>
+      <action issue="CODEC-315" dev="ggregory" type="fix" due-to="Arthur Chan, Gary Gregory">Fix possible IndexOutOfBoundException in PhoneticEngine.encode method #223.</action>
+      <action issue="CODEC-313" dev="ggregory" type="fix" due-to="Arthur Chan, Gary Gregory">Fix possible ArrayIndexOutOfBoundsException in QuotedPrintableCodec.encodeQuotedPrintable() method #221.</action>
+      <action issue="CODEC-312" dev="ggregory" type="fix" due-to="Arthur Chan, Gary Gregory">Fix possible StringIndexOutOfBoundException in MatchRatingApproachEncoder.encode() method #220.</action>
+      <action issue="CODEC-311" dev="ggregory" type="fix" due-to="Arthur Chan, Gary Gregory">Fix possible ArrayIndexOutOfBoundException in RefinedSoundex.getMappingCode() #219.</action>
+      <action issue="CODEC-314" dev="ggregory" type="fix" due-to="Arthur Chan, Gary Gregory">Fix possible IndexOutOfBoundsException in PercentCodec.insertAlwaysEncodeChars() method #222.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate UnixCrypt 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate Md5Crypt 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate Crypt 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate StringUtils 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate Resources 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate Charsets 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate CharEncoding 0-argument constructor.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Add missing version for animal-sniffer-maven-plugin.</action>
+      <!-- UPDATE -->
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump commons-parent from 58 to 66.</action>
+      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump commons-lang3 from 3.12.0 to 3.14.0.</action>      
+      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump commons-io from 2.13.0 to 2.15.1.</action>      
+    </release>
+    <release version="1.16.0" date="2023-06-17" description="Feature and fix release. Requires a minimum of Java 8.">
       <!-- FIX -->
       <action issue="CODEC-295" dev="ggregory" type="fix" due-to="Arturo Bernal">Minor improvements #67.</action> 
       <action                   dev="aherbert" type="fix" due-to="James Gan">Remove duplicated words from Javadocs.</action>
@@ -53,22 +139,26 @@ The <action> type attribute can be add,update,fix,remove.
       <action                   dev="ggregory" type="fix" due-to="Arturo Bernal">Avoid use toString() or substring() in favor of a simplified expression #126.</action>
       <action issue="CODEC-305" dev="aherbert" type="fix" due-to="Florian">Fix byte-skipping in Base16 decoding #135.</action>
       <action                   dev="kinow" type="fix" due-to="Marc Wrobel">Fix several typos, improve writing in some javadocs #139.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">BaseNCodecOutputStream.eof() should not throw IOException.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Javadoc improvements and cleanups.</action>
+      <action                   dev="ggregory" type="fix" due-to="Gary Gregory">Deprecate BaseNCodec.isWhiteSpace(byte) and use Character.isWhitespace(int).</action>
       <!-- ADD -->
       <action issue="CODEC-296" dev="mattsicker" type="add" due-to="Matt Sicker">Add support for Blake3 family of hashes.</action>
       <action                   dev="ggregory" type="add">Add github/codeql-action.</action>
       <!-- UPDATE -->
-      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/cache from v2 to v3.0.8 #75, #99, #119, #138.</action>
-      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/setup-java from v1.4.1 to 3 #60, #62, #121.</action>
-      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/checkout from 2.3.2 to 3.0.2 #65, #98, #114.</action>
-      <action                   dev="ggregory" type="update" due-to="Dependabot">Bump commons-parent from 52 to 54, #147.</action>
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/cache from v2 to v3.0.10 #75, #99, #119, #138, #149, #152.</action>
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/setup-java from v1.4.1 to 3.5.1 #60, #62, #121.</action>
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump actions/checkout from 2.3.2 to 3.1.0 #65, #98, #114, #153.</action>
+      <action                   dev="ggregory" type="update" due-to="Dependabot, Gary Gregory">Bump commons-parent from 52 to 58, #147, #165, #170.</action>
       <action issue="CODEC-285" dev="ggregory" type="update" due-to="Dependabot, John Patrick">Bump junit from 4.13.1 to 5.9.1 #76, #39, #140, #148.</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump Java 7 to 8.</action>
-      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump japicmp-maven-plugin from 0.14.3 to 0.16.0.</action>
-      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump jacoco-maven-plugin from 0.8.5 to 0.9.7 (Fixes Java 15 builds).</action>
+      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump japicmp-maven-plugin from 0.14.3 to 0.17.1.</action>
+      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump jacoco-maven-plugin from 0.8.5 to 0.8.8 (Fixes Java 15 builds).</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump maven-surefire-plugin from 2.22.2 to 3.0.0-M7 #122, #134.</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump maven-javadoc-plugin from 3.2.0 to 3.4.1.</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump animal-sniffer-maven-plugin from 1.19 to 1.22.</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory, Dependabot">Bump maven-pmd-plugin from 3.13.0 to 3.19.0, #133, #142, #145.</action>
+      <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump pmd from 6.47.0 to 6.52.0.</action>
       <action                   dev="ggregory" type="update" due-to="Gary Gregory">Bump maven-checkstyle-plugin from 2.17 to 3.2.0 #143.</action>
       <action                   dev="kinow, ggregory" type="update" due-to="Dependabot">Bump checkstyle from 8.45.1 to 9.3 #97, #100, #101, #103.</action>
       <action                   dev="ggregory" type="update" due-to="Dependabot">Bump taglist-maven-plugin from 2.4 to 3.0.0 #102.</action>       
@@ -113,7 +203,7 @@ The <action> type attribute can be add,update,fix,remove.
       <action issue="CODEC-236" dev="ggregory" due-to=" Tomas Shestakov, Gary Gregory" type="update">Broken direct java.nio.ByteBuffer support in org.apache.commons.codec.binary.Hex.</action>
     </release>
 
-    <release version="1.12" date="2019-02-04" description="Feature and fix release.">
+    <release version="1.12" date="2019-02-04" description="Feature and fix release. Requires a minimum of Java 7.">
       <!-- The first attribute below should be the issue id; makes it easier to navigate in the IDE outline -->
       <action issue="CODEC-252" dev="chtompki" type="fix">B64 salt generator: Random -> ThreadLocalRandom</action>
       <action issue="CODEC-250" dev="sebb" type="fix" due-to="Alex Volodko">Wrong value calculated by Cologne Phonetic if a special character is placed between equal letters</action>
@@ -181,14 +271,14 @@ The <action> type attribute can be add,update,fix,remove.
       <action dev="ggregory" type="fix" issue="CODEC-170" due-to="Ron Wheeler, Henri Yandell">Link broken in Metaphone Javadoc</action>
       <action dev="ggregory" type="fix" issue="CODEC-176" due-to="Ville Skyttä">Spelling fixes in Javadoc and comments</action>
     </release>
-    <release version="1.8" date="19 April 2013" description="Feature and fix release. Requires a minimum of Java 1.6.">
+    <release version="1.8" date="19 April 2013" description="Feature and fix release. Requires a minimum of Java 6.">
       <action dev="ggregory" type="add" issue="CODEC-168" due-to="Daniel Cassidy">Add DigestUtils.updateDigest(MessageDigest, InputStream).</action>
       <action dev="julius" type="add" issue="CODEC-167">Add JUnit to test our decode with pad character in the middle.</action>
       <action dev="ggregory" type="add" issue="CODEC-161" due-to="crice">Add Match Rating Approach (MRA) phonetic algorithm encoder.</action>
       <action dev="ggregory" type="fix" issue="CODEC-163" due-to="leo141">ColognePhonetic encoder unnecessarily creates many char arrays on every loop run.</action>
       <action dev="sebb" type="fix" issue="CODEC-160">Base64.encodeBase64URLSafeString doesn't add padding characters at the end.</action>
     </release>
-    <release version="1.7" date="11 September 2012" description="Feature and fix release. Requires a minimum of Java 1.6.">
+    <release version="1.7" date="11 September 2012" description="Feature and fix release. Requires a minimum of Java 6.">
       <action issue="CODEC-157" dev="ggregory" type="add" due-to="ggregory">
         DigestUtils: Add MD2 APIs.
       </action>
@@ -253,7 +343,7 @@ The <action> type attribute can be add,update,fix,remove.
         Implement NYSIIS phonetic encoder.
       </action>
     </release>
-    <release version="1.6" date="20 November 2011" description="Feature and fix release. Requires a minimum of Java 1.5.">
+    <release version="1.6" date="20 November 2011" description="Feature and fix release. Requires a minimum of Java 5.">
       <action dev="ggregory" type="fix" issue="CODEC-129" due-to="ggregory">
         Use standard Maven directory layout.
       </action>

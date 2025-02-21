@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,33 +16,31 @@
  */
 package org.apache.commons.codec.language;
 
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.StringEncoderAbstractTest;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.apache.commons.codec.AbstractStringEncoderTest;
+import org.apache.commons.codec.EncoderException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link DaitchMokotoffSoundex}.
  * <p>
  * Keep this file in UTF-8 encoding for proper Javadoc processing.
  * </p>
- *
- * @since 1.10
  */
-public class DaitchMokotoffSoundexTest extends StringEncoderAbstractTest<DaitchMokotoffSoundex> {
+public class DaitchMokotoffSoundexTest extends AbstractStringEncoderTest<DaitchMokotoffSoundex> {
 
     @Override
     protected DaitchMokotoffSoundex createStringEncoder() {
         return new DaitchMokotoffSoundex();
     }
 
-    private String soundex(final String source) {
-        return getStringEncoder().soundex(source);
-    }
-
     private String encode(final String source) {
         return getStringEncoder().encode(source);
+    }
+
+    private String soundex(final String source) {
+        return getStringEncoder().soundex(source);
     }
 
     @Test
@@ -83,7 +81,7 @@ public class DaitchMokotoffSoundexTest extends StringEncoderAbstractTest<DaitchM
 
     @Test
     public void testEncodeIgnoreApostrophes() throws EncoderException {
-        this.checkEncodingVariations("079600", new String[] { "OBrien", "'OBrien", "O'Brien", "OB'rien", "OBr'ien",
+        checkEncodingVariations("079600", new String[] { "OBrien", "'OBrien", "O'Brien", "OB'rien", "OBr'ien",
                 "OBri'en", "OBrie'n", "OBrien'" });
     }
 
@@ -93,7 +91,7 @@ public class DaitchMokotoffSoundexTest extends StringEncoderAbstractTest<DaitchM
      * @throws EncoderException for some failure scenarios     */
     @Test
     public void testEncodeIgnoreHyphens() throws EncoderException {
-        this.checkEncodingVariations("565463", new String[] { "KINGSMITH", "-KINGSMITH", "K-INGSMITH", "KI-NGSMITH",
+        checkEncodingVariations("565463", new String[] { "KINGSMITH", "-KINGSMITH", "K-INGSMITH", "KI-NGSMITH",
                 "KIN-GSMITH", "KING-SMITH", "KINGS-MITH", "KINGSM-ITH", "KINGSMI-TH", "KINGSMIT-H", "KINGSMITH-" });
     }
 
@@ -144,7 +142,7 @@ public class DaitchMokotoffSoundexTest extends StringEncoderAbstractTest<DaitchM
     }
 
     /**
-     * Examples from http://en.wikipedia.org/wiki/Daitch%E2%80%93Mokotoff_Soundex
+     * Examples from https://en.wikipedia.org/wiki/Daitch%E2%80%93Mokotoff_Soundex
      */
     @Test
     public void testSoundexBasic3() {

@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -97,11 +97,6 @@ public class BinaryCodec implements BinaryDecoder, BinaryEncoder {
         return raw;
     }
 
-    // ------------------------------------------------------------------------
-    //
-    // static codec operations
-    //
-    // ------------------------------------------------------------------------
     /**
      * Decodes a char array where each char represents an ASCII '0' or '1'.
      *
@@ -136,8 +131,6 @@ public class BinaryCodec implements BinaryDecoder, BinaryEncoder {
      * @param array
      *            the source array
      * @return {@code true} if the given array is {@code null} or empty (size 0.)
-     *
-     * @since 1.16 change visibility to public
      */
     static boolean isEmpty(final byte[] array) {
         return array == null || array.length == 0;
@@ -216,6 +209,13 @@ public class BinaryCodec implements BinaryDecoder, BinaryEncoder {
      */
     public static String toAsciiString(final byte[] raw) {
         return new String(toAsciiChars(raw));
+    }
+
+    /**
+     * Constructs a new instance.
+     */
+    public BinaryCodec() {
+        // empty
     }
 
     /**

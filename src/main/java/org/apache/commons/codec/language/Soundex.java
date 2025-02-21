@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,11 +33,14 @@ public class Soundex implements StringEncoder {
      * The marker character used to indicate a silent (ignored) character.
      * These are ignored except when they appear as the first character.
      * <p>
-     * Note: the {@link #US_ENGLISH_MAPPING_STRING} does not use this mechanism
+     * Note: The {@link #US_ENGLISH_MAPPING_STRING} does not use this mechanism
      * because changing it might break existing code. Mappings that don't contain
      * a silent marker code are treated as though H and W are silent.
+     * </p>
      * <p>
      * To override this, use the {@link #Soundex(String, boolean)} constructor.
+     * </p>
+     *
      * @since 1.11
      */
     public static final char SILENT_MARKER = '-';
@@ -48,12 +51,13 @@ public class Soundex implements StringEncoder {
      * <p>
      * (This constant is provided as both an implementation convenience and to allow Javadoc to pick
      * up the value for the constant values page.)
+     * </p>
      * <p>
-     * <b>Note that letters H and W are treated specially.</b>
+     * <strong>Note that letters H and W are treated specially.</strong>
      * They are ignored (after the first letter) and don't act as separators
      * between consonants with the same code.
+     * </p>
      */
-    //                                                      ABCDEFGHIJKLMNOPQRSTUVWXYZ
     public static final String US_ENGLISH_MAPPING_STRING = "01230120022455012623010202";
 
     /**
@@ -82,6 +86,7 @@ public class Soundex implements StringEncoder {
      * Such letters aren't encoded (after the first), but they do
      * act as separators when dropping duplicate codes.
      * The mapping is otherwise the same as for {@link #US_ENGLISH}
+     * </p>
      *
      * @since 1.11
      */
@@ -94,9 +99,11 @@ public class Soundex implements StringEncoder {
      * This treats vowels (AEIOUY), H and W as silent letters.
      * Such letters are ignored (after the first) and do not
      * act as separators when dropping duplicate codes.
+     * </p>
      * <p>
      * The codes for consonants are otherwise the same as for
      * {@link #US_ENGLISH_MAPPING_STRING} and {@link #US_ENGLISH_SIMPLIFIED}
+     * </p>
      *
      * @since 1.11
      */
@@ -123,6 +130,7 @@ public class Soundex implements StringEncoder {
      * In versions of the code prior to 1.11,
      * the code always treated H and W as silent (ignored) letters.
      * If this field is false, H and W are no longer special-cased.
+     * </p>
      */
     private final boolean specialCaseHW;
 
@@ -140,11 +148,13 @@ public class Soundex implements StringEncoder {
     /**
      * Creates a soundex instance using the given mapping. This constructor can be used to provide an internationalized
      * mapping for a non-Western character set.
-     *
+     * <p>
      * Every letter of the alphabet is "mapped" to a numerical value. This char array holds the values to which each
      * letter is mapped. This implementation contains a default map for US_ENGLISH
+     * </p>
      * <p>
      * If the mapping contains an instance of {@link #SILENT_MARKER} then H and W are not given special treatment
+     * </p>
      *
      * @param mapping
      *                  Mapping array to use when finding the corresponding code for a given character
@@ -154,20 +164,12 @@ public class Soundex implements StringEncoder {
         this.specialCaseHW = !hasMarker(this.soundexMapping);
     }
 
-    private boolean hasMarker(final char[] mapping) {
-        for(final char ch : mapping) {
-            if (ch == SILENT_MARKER) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Creates a refined soundex instance using a custom mapping. This constructor can be used to customize the mapping,
      * and/or possibly provide an internationalized mapping for a non-Western character set.
      * <p>
      * If the mapping contains an instance of {@link #SILENT_MARKER} then H and W are not given special treatment
+     * </p>
      *
      * @param mapping
      *            Mapping string to use when finding the corresponding code for a given character
@@ -202,10 +204,9 @@ public class Soundex implements StringEncoder {
      * @param s2
      *                  A String that will be encoded and compared.
      * @return The number of characters in the two encoded Strings that are the same from 0 to 4.
-     *
      * @see SoundexUtils#difference(StringEncoder,String,String)
-     * @see <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp"> MS
-     *          T-SQL DIFFERENCE </a>
+     * @see <a href="https://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp"> MS
+     *          T-SQL DIFFERENCE</a>
      *
      * @throws EncoderException
      *                  if an error occurs encoding one of the strings
@@ -217,14 +218,14 @@ public class Soundex implements StringEncoder {
 
     /**
      * Encodes an Object using the soundex algorithm. This method is provided in order to satisfy the requirements of
-     * the Encoder interface, and will throw an EncoderException if the supplied object is not of type java.lang.String.
+     * the Encoder interface, and will throw an EncoderException if the supplied object is not of type {@link String}.
      *
      * @param obj
      *                  Object to encode
-     * @return An object (or type java.lang.String) containing the soundex code which corresponds to the String
+     * @return An object (or type {@link String}) containing the soundex code which corresponds to the String
      *             supplied.
      * @throws EncoderException
-     *                  if the parameter supplied is not of type java.lang.String
+     *                  if the parameter supplied is not of type {@link String}
      * @throws IllegalArgumentException
      *                  if a character is not mapped
      */
@@ -259,6 +260,15 @@ public class Soundex implements StringEncoder {
     @Deprecated
     public int getMaxLength() {
         return this.maxLength;
+    }
+
+    private boolean hasMarker(final char[] mapping) {
+        for (final char ch : mapping) {
+            if (ch == SILENT_MARKER) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -307,14 +317,14 @@ public class Soundex implements StringEncoder {
         if (str.isEmpty()) {
             return str;
         }
-        final char[] out = {'0', '0', '0', '0'};
+        final char[] out = { '0', '0', '0', '0' };
         int count = 0;
         final char first = str.charAt(0);
         out[count++] = first;
         char lastDigit = map(first); // previous digit
-        for(int i = 1; i < str.length() && count < out.length ; i++) {
+        for (int i = 1; i < str.length() && count < out.length; i++) {
             final char ch = str.charAt(i);
-            if ((this.specialCaseHW) && (ch == 'H' || ch == 'W')) { // these are ignored completely
+            if (this.specialCaseHW && (ch == 'H' || ch == 'W')) { // these are ignored completely
                 continue;
             }
             final char digit = map(ch);

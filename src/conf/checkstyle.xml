@@ -15,42 +15,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 <!DOCTYPE module PUBLIC
-    "-//Checkstyle//DTD Checkstyle Configuration 1.2//EN"
-    "https://checkstyle.org/dtds/configuration_1_2.dtd">
-
-<!-- commons codec customization of default Checkstyle behavior -->
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
-  <property name="localeLanguage" value="en" />
-
-  <module name="SuppressionFilter">
-    <property name="file" value="src/conf/checkstyle-suppressions.xml"/>
-  </module>
-
-  <!-- Checks whether files end with a new line. -->
-  <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
-  <module name="NewlineAtEndOfFile" />
-
-  <!-- Verify that EVERY source file has the appropriate license -->
-  <module name="Header">
-    <property name="headerFile" value="${checkstyle.header.file}" />
-  </module>
-
-  <!-- Checks for Tab characters -->
-  <!-- See http://checkstyle.sourceforge.net/config_whitespace.html#FileTabCharacter -->
   <module name="FileTabCharacter">
     <property name="fileExtensions" value="java" />
   </module>
-
-  <!-- Checks for white space at the end of the line -->
-  <!-- See http://checkstyle.sourceforge.net/config_regexp.html -->
+  <module name="Header">
+    <property name="headerFile" value="${checkstyle.header.file}" />
+  </module>
+  <module name="JavadocPackage" />
+  <module name="LineLength">
+      <!-- Ignore lines that begin with " * ", such as within a Javadoc comment. -->
+      <property name="ignorePattern" value="^ *\* *[^ ]"/>
+      <property name="max" value="160"/>
+  </module>
+  <module name="NewlineAtEndOfFile" />
   <module name="RegexpSingleline">
     <property name="format" value="\s+$" />
     <property name="message" value="Line has trailing spaces." />
     <property name="fileExtensions" value="java" />
   </module>
-
   <!-- @author tags are deprecated -->
   <module name="RegexpSingleline">
     <property name="format" value="^\s+\*\s+@author\s" />
@@ -58,18 +44,52 @@ limitations under the License.
     <property name="fileExtensions" value="java" />
     <property name="severity" value="warning" />
   </module>
-
+  <module name="SuppressionFilter">
+    <property name="file" value="src/conf/checkstyle-suppressions.xml"/>
+  </module>
   <module name="TreeWalker">
+    <module name="ArrayTypeStyle" />
+    <module name="AvoidStarImport" />
+    <module name="CovariantEquals" />
+    <module name="DefaultComesLast" />
+    <module name="EmptyBlock">
+      <property name="option" value="text" />
+    </module>
+    <module name="EqualsHashCode" />
+    <module name="ExplicitInitialization" />
+    <module name="FallThrough" />
+    <module name="FinalLocalVariable" />
+    <module name="IllegalImport" />
+    <module name="IllegalInstantiation" />
+    <module name="ImportOrder">
+      <property name="option" value="top" />
+      <property name="groups" value="java,javax,org" />
+      <property name="ordered" value="true" />
+      <property name="separated" value="true" />
+    </module>
+    <module name="LeftCurly" />
+    <module name="MissingOverride" />
+    <module name="ModifierOrder" />
+    <module name="NeedBraces" />
     <module name="OperatorWrap">
       <property name="option" value="eol" />
     </module>
+    <module name="ParenPad" />
+    <module name="RedundantImport" />
+    <module name="RedundantModifier" />
+    <module name="RightCurly" />
+    <module name="SimplifyBooleanExpression" />
+    <module name="SimplifyBooleanReturn" />
+    <module name="StringLiteralEquality" />
+    <module name="SuperClone" />
+    <module name="SuperFinalize" />
+    <module name="TypecastParenPad" />    
+    <module name="UnnecessaryParentheses" />
+    <module name="UnusedImports" />
+    <module name="UpperEll" />
+    <module name="WhitespaceAfter" />
+    <module name="WhitespaceAround" />
   </module>
-
-  <module name="LineLength">
-      <!-- Ignore lines that begin with " * ", such as within a Javadoc comment. -->
-      <property name="ignorePattern" value="^ *\* *[^ ]"/>
-      <property name="max" value="160"/>
-  </module>
-
+  <property name="localeLanguage" value="en" />
 </module>
 

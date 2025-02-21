@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,18 +17,37 @@
 
 package org.apache.commons.codec;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.apache.commons.io.Charsets;
+import org.junit.jupiter.api.Test;
 
 /**
  * Sanity checks for {@link Charsets}.
- *
  */
 public class CharsetsTest {
+
+    private static final TreeSet<String> AVAILABLE_CHARSET_NAMES = new TreeSet<>(Charset.availableCharsets().keySet());
+
+    public static SortedSet<String> getAvailableCharsetNames() {
+        return AVAILABLE_CHARSET_NAMES;
+    }
+
+    public static Collection<Charset> getRequiredCharsets() {
+        return Charsets.requiredCharsets().values();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testIso8859_1() {
+        assertEquals("ISO-8859-1", Charsets.ISO_8859_1.name());
+    }
 
     @Test
     public void testToCharset() {
@@ -40,38 +59,32 @@ public class CharsetsTest {
 
     @SuppressWarnings("deprecation")
     @Test
-    public void testIso8859_1() {
-        assertEquals("ISO-8859-1", Charsets.ISO_8859_1.name());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
     public void testUsAscii() {
-        assertEquals("US-ASCII", Charsets.US_ASCII.name());
+        assertEquals(StandardCharsets.US_ASCII.name(), Charsets.US_ASCII.name());
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testUtf16() {
-        assertEquals("UTF-16", Charsets.UTF_16.name());
+        assertEquals(StandardCharsets.UTF_16.name(), Charsets.UTF_16.name());
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testUtf16Be() {
-        assertEquals("UTF-16BE", Charsets.UTF_16BE.name());
+        assertEquals(StandardCharsets.UTF_16BE.name(), Charsets.UTF_16BE.name());
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testUtf16Le() {
-        assertEquals("UTF-16LE", Charsets.UTF_16LE.name());
+        assertEquals(StandardCharsets.UTF_16LE.name(), Charsets.UTF_16LE.name());
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testUtf8() {
-        assertEquals("UTF-8", Charsets.UTF_8.name());
+        assertEquals(StandardCharsets.UTF_8.name(), Charsets.UTF_8.name());
     }
 
 }

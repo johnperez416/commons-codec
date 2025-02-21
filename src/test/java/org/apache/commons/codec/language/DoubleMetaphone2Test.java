@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,20 +17,20 @@
 
 package org.apache.commons.codec.language;
 
-import org.apache.commons.codec.StringEncoderAbstractTest;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.apache.commons.codec.AbstractStringEncoderTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link DoubleMetaphone}.
  * <p>
  * The test data was extracted from Stephen Woodbridge's <a
- * href="http://swoodbridge.com/DoubleMetaPhone/surnames.txt">PHP test program</a>.
+ * href="https://swoodbridge.com/DoubleMetaPhone/surnames.txt">PHP test program</a>.
  *
- * @see <a href="http://swoodbridge.com/DoubleMetaPhone/surnames.txt">PHP test program</a>
+ * @see <a href="https://swoodbridge.com/DoubleMetaPhone/surnames.txt">PHP test program</a>
  */
-public class DoubleMetaphone2Test extends StringEncoderAbstractTest<DoubleMetaphone> {
+public class DoubleMetaphone2Test extends AbstractStringEncoderTest<DoubleMetaphone> {
 
     private static final int ALTERNATE_INDEX = 2;
 
@@ -1263,7 +1263,7 @@ public class DoubleMetaphone2Test extends StringEncoderAbstractTest<DoubleMetaph
     private void checkDoubleMetaphone(final int typeIndex, final boolean alternate) {
         for (int i = 0; i < TEST_DATA.length; i++) {
             final String value = TEST_DATA[i][0];
-            assertEquals(TEST_DATA[i][typeIndex], this.getStringEncoder().doubleMetaphone(value, alternate), "Test [" + i + "]=" + value);
+            assertEquals(TEST_DATA[i][typeIndex], getStringEncoder().doubleMetaphone(value, alternate), "Test [" + i + "]=" + value);
         }
     }
 
@@ -1277,7 +1277,7 @@ public class DoubleMetaphone2Test extends StringEncoderAbstractTest<DoubleMetaph
      */
     @Test
     public void testDoubleMetaphoneAlternate() {
-        this.checkDoubleMetaphone(ALTERNATE_INDEX, true);
+        checkDoubleMetaphone(ALTERNATE_INDEX, true);
     }
 
     /**
@@ -1285,6 +1285,6 @@ public class DoubleMetaphone2Test extends StringEncoderAbstractTest<DoubleMetaph
      */
     @Test
     public void testDoubleMetaphonePrimary() {
-        this.checkDoubleMetaphone(PRIMARY_INDEX, false);
+        checkDoubleMetaphone(PRIMARY_INDEX, false);
     }
 }

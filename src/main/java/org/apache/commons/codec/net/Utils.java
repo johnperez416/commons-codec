@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.apache.commons.codec.DecoderException;
  *
  * @since 1.4
  */
-class Utils {
+final class Utils {
 
     /**
      * Radix used in encoding and decoding.
@@ -39,7 +39,6 @@ class Utils {
      * @param b
      *            The byte to be converted.
      * @return The numeric value represented by the character in radix 16.
-     *
      * @throws DecoderException
      *             Thrown when the byte is not valid per {@link Character#digit(char,int)}
      */
@@ -52,10 +51,10 @@ class Utils {
     }
 
     /**
-     * Returns the upper case hex digit of the lower 4 bits of the int.
+     * Returns the upper case hexadecimal digit of the lower 4 bits of the int.
      *
      * @param b the input int
-     * @return the upper case hex digit of the lower 4 bits of the int.
+     * @return the upper case hexadecimal digit of the lower 4 bits of the int.
      */
     static char hexDigit(final int b) {
         return Character.toUpperCase(Character.forDigit(b & 0xF, RADIX));

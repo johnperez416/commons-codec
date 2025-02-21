@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,10 +27,8 @@ import java.util.Random;
  * <p>
  * This class is immutable and thread-safe.
  * </p>
- *
- * @since 1.7
  */
-class B64 {
+final class B64 {
 
     /**
      * Table with characters for Base64 transformation.
@@ -40,7 +38,8 @@ class B64 {
     /**
      * Table with characters for Base64 transformation.
      */
-    static final char[] B64T_ARRAY = B64T_STRING.toCharArray();
+    static final char[] B64T_ARRAY = B64T_STRING.toCharArray(); // package access for testing
+    // N.B. Do not make this protected or public. Array contents are mutable!
 
     /**
      * Base64 like conversion of bytes to ASCII chars.
@@ -59,7 +58,7 @@ class B64 {
     static void b64from24bit(final byte b2, final byte b1, final byte b0, final int outLen,
                              final StringBuilder buffer) {
         // The bit masking is necessary because the JVM byte type is signed!
-        int w = ((b2 << 16) & 0x00ffffff) | ((b1 << 8) & 0x00ffff) | (b0 & 0xff);
+        int w = b2 << 16 & 0x00ffffff | b1 << 8 & 0x00ffff | b0 & 0xff;
         // It's effectively a "for" loop but kept to resemble the original C code.
         int n = outLen;
         while (n-- > 0) {
@@ -68,18 +67,18 @@ class B64 {
         }
     }
 
-  /**
-   * Generates a string of random chars from the B64T set.
-   * <p>
-   * The salt is generated with {@link SecureRandom}.
-   * </p>
-   *
-   * @param num Number of chars to generate.
-   * @return a random salt {@link String}.
-   */
-  static String getRandomSalt(final int num) {
-    return getRandomSalt(num, new SecureRandom());
-  }
+    /**
+     * Generates a string of random chars from the B64T set.
+     * <p>
+     * The salt is generated with {@link SecureRandom}.
+     * </p>
+     *
+     * @param num Number of chars to generate.
+     * @return a random salt {@link String}.
+     */
+    static String getRandomSalt(final int num) {
+        return getRandomSalt(num, new SecureRandom());
+    }
 
     /**
      * Generates a string of random chars from the B64T set.

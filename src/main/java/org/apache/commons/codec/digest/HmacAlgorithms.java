@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,15 +25,15 @@ package org.apache.commons.codec.digest;
  * <strong>Note: Not all JCE implementations support all the algorithms in this enum.</strong>
  * </p>
  *
- * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html#SunJCEProvider"> Java
- *      6 Cryptography Architecture Sun Providers Documentation</a>
- * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/SunProviders.html#SunJCEProvider"> Java
- *      7 Cryptography Architecture Sun Providers Documentation</a>
- * @see <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJCEProvider"> Java
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJCEProvider"> Java
  *      8 Cryptography Architecture Sun Providers Documentation</a>
  * @see <a href=
- *      "http://docs.oracle.com/javase/9/security/oracleproviders.htm#JSSEC-GUID-A47B1249-593C-4C38-A0D0-68FA7681E0A7">
- *      Java 9 Cryptography Architecture Sun Providers Documentation</a>
+ *      "https://docs.oracle.com/en/java/javase/11/security/oracle-providers.html#GUID-A47B1249-593C-4C38-A0D0-68FA7681E0A7">
+ *      Java 11 Cryptography Architecture Sun Providers Documentation</a>
+ * @see <a href=
+ *      "https://docs.oracle.com/en/java/javase/17/security/oracle-providers.html#GUID-A47B1249-593C-4C38-A0D0-68FA7681E0A7">
+ *      Java 17 Cryptography Architecture Sun Providers Documentation</a>
+ *
  * @since 1.10
  */
 public enum HmacAlgorithms {
@@ -104,16 +104,16 @@ public enum HmacAlgorithms {
     }
 
     /**
-     * The algorithm name
+     * The algorithm name.
      *
-     * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
+     * @see <a href="https://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
      *      Java 6 Cryptography Architecture Sun Providers Documentation</a>
-     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
+     * @see <a href="https://docs.oracle.com/javase/7/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
      *      Java 7 Cryptography Architecture Sun Providers Documentation</a>
-     * @see <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
+     * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJCEProvider">
      *      Java 8 Cryptography Architecture Sun Providers Documentation</a>
      * @see <a href=
-     *      "http://docs.oracle.com/javase/9/security/oracleproviders.htm#JSSEC-GUID-A47B1249-593C-4C38-A0D0-68FA7681E0A7">
+     *      "https://docs.oracle.com/javase/9/security/oracleproviders.htm#JSSEC-GUID-A47B1249-593C-4C38-A0D0-68FA7681E0A7">
      *      Java 9 Cryptography Architecture Sun Providers Documentation</a>
      * @return The algorithm name ("HmacSHA512" for example)
      */

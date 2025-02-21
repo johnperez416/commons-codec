@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 
 package org.apache.commons.codec.language;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.commons.codec.EncoderException;
@@ -25,11 +26,11 @@ import org.apache.commons.codec.StringEncoder;
 /**
  * Encodes a string into a Cologne Phonetic value.
  * <p>
- * Implements the <a href="http://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik">K&ouml;lner Phonetik</a> (Cologne
+ * Implements the <a href="https://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik">K&ouml;lner Phonetik</a> (Cologne
  * Phonetic) algorithm issued by Hans Joachim Postel in 1969.
  * </p>
  * <p>
- * The <i>K&ouml;lner Phonetik</i> is a phonetic algorithm which is optimized for the German language. It is related to
+ * The <em>K&ouml;lner Phonetik</em> is a phonetic algorithm which is optimized for the German language. It is related to
  * the well-known soundex algorithm.
  * </p>
  *
@@ -40,11 +41,11 @@ import org.apache.commons.codec.StringEncoder;
  * <li>
  * <h3>Step 1:</h3>
  * After preprocessing (conversion to upper case, transcription of <a
- * href="http://en.wikipedia.org/wiki/Germanic_umlaut">germanic umlauts</a>, removal of non alphabetical characters) the
+ * href="https://en.wikipedia.org/wiki/Germanic_umlaut">germanic umlauts</a>, removal of non alphabetical characters) the
  * letters of the supplied text are replaced by their phonetic code according to the following table.
  * <table border="1">
  * <caption style="caption-side: bottom"><small><i>(Source: <a
- * href="http://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik#Buchstabencodes">Wikipedia (de): K&ouml;lner Phonetik --
+ * href="https://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik#Buchstabencodes">Wikipedia (de): K&ouml;lner Phonetik --
  * Buchstabencodes</a>)</i></small></caption> <tbody>
  * <tr>
  * <th>Letter</th>
@@ -176,23 +177,10 @@ import org.apache.commons.codec.StringEncoder;
  * This class is thread-safe.
  * </p>
  *
- * @see <a href="http://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik">Wikipedia (de): K&ouml;lner Phonetik (in German)</a>
+ * @see <a href="https://de.wikipedia.org/wiki/K%C3%B6lner_Phonetik">Wikipedia (de): K&ouml;lner Phonetik (in German)</a>
  * @since 1.5
  */
 public class ColognePhonetic implements StringEncoder {
-
-    // Predefined char arrays for better performance and less GC load
-    private static final char[] AEIJOUY = { 'A', 'E', 'I', 'J', 'O', 'U', 'Y' };
-    private static final char[] CSZ = { 'C', 'S', 'Z' };
-    private static final char[] FPVW = { 'F', 'P', 'V', 'W' };
-    private static final char[] GKQ = { 'G', 'K', 'Q' };
-    private static final char[] CKQ = { 'C', 'K', 'Q' };
-    private static final char[] AHKLOQRUX = { 'A', 'H', 'K', 'L', 'O', 'Q', 'R', 'U', 'X' };
-    private static final char[] SZ = { 'S', 'Z' };
-    private static final char[] AHKOQUX = { 'A', 'H', 'K', 'O', 'Q', 'U', 'X' };
-    private static final char[] DTX = { 'D', 'T', 'X' };
-
-    private static final char CHAR_IGNORE = '-';    // is this character to be ignored?
 
     /**
      * This class is not thread-safe; the field {@link #length} is mutable.
@@ -203,19 +191,23 @@ public class ColognePhonetic implements StringEncoder {
 
         protected final char[] data;
 
-        protected int length = 0;
+        protected int length;
 
-        public CologneBuffer(final char[] data) {
+        CologneBuffer(final char[] data) {
             this.data = data;
             this.length = data.length;
         }
 
-        public CologneBuffer(final int buffSize) {
+        CologneBuffer(final int buffSize) {
             this.data = new char[buffSize];
             this.length = 0;
         }
 
         protected abstract char[] copyData(int start, int length);
+
+        public boolean isEmpty() {
+            return length() == 0;
+        }
 
         public int length() {
             return length;
@@ -225,48 +217,11 @@ public class ColognePhonetic implements StringEncoder {
         public String toString() {
             return new String(copyData(0, length));
         }
-
-        public boolean isEmpty() {
-            return length() == 0;
-        }
     }
 
-    private class CologneOutputBuffer extends CologneBuffer {
+    private final class CologneInputBuffer extends CologneBuffer {
 
-        private char lastCode;
-
-        public CologneOutputBuffer(final int buffSize) {
-            super(buffSize);
-            lastCode = '/'; // impossible value
-        }
-
-        /**
-         * Stores the next code in the output buffer, keeping track of the previous code.
-         * '0' is only stored if it is the first entry.
-         * Ignored chars are never stored.
-         * If the code is the same as the last code (whether stored or not) it is not stored.
-         *
-         * @param code the code to store.
-         */
-        public void put(final char code) {
-            if (code != CHAR_IGNORE && lastCode != code && (code != '0' || length == 0)) {
-                data[length] = code;
-                length++;
-            }
-            lastCode = code;
-        }
-
-        @Override
-        protected char[] copyData(final int start, final int length) {
-            final char[] newData = new char[length];
-            System.arraycopy(data, start, newData, 0, length);
-            return newData;
-        }
-    }
-
-    private class CologneInputBuffer extends CologneBuffer {
-
-        public CologneInputBuffer(final char[] data) {
+        CologneInputBuffer(final char[] data) {
             super(data);
         }
 
@@ -292,6 +247,52 @@ public class ColognePhonetic implements StringEncoder {
         }
     }
 
+    private final class CologneOutputBuffer extends CologneBuffer {
+
+        private char lastCode;
+
+        CologneOutputBuffer(final int buffSize) {
+            super(buffSize);
+            lastCode = '/'; // impossible value
+        }
+
+        @Override
+        protected char[] copyData(final int start, final int length) {
+            return Arrays.copyOfRange(data, start, length);
+        }
+
+        /**
+         * Stores the next code in the output buffer, keeping track of the previous code.
+         * '0' is only stored if it is the first entry.
+         * Ignored chars are never stored.
+         * If the code is the same as the last code (whether stored or not) it is not stored.
+         *
+         * @param code the code to store.
+         */
+        public void put(final char code) {
+            if (code != CHAR_IGNORE && lastCode != code && (code != '0' || length == 0)) {
+                data[length] = code;
+                length++;
+            }
+            lastCode = code;
+        }
+    }
+    // Predefined char arrays for better performance and less GC load
+    private static final char[] AEIJOUY = { 'A', 'E', 'I', 'J', 'O', 'U', 'Y' };
+    private static final char[] CSZ = { 'C', 'S', 'Z' };
+    private static final char[] FPVW = { 'F', 'P', 'V', 'W' };
+    private static final char[] GKQ = { 'G', 'K', 'Q' };
+    private static final char[] CKQ = { 'C', 'K', 'Q' };
+    private static final char[] AHKLOQRUX = { 'A', 'H', 'K', 'L', 'O', 'Q', 'R', 'U', 'X' };
+
+    private static final char[] SZ = { 'S', 'Z' };
+
+    private static final char[] AHKOQUX = { 'A', 'H', 'K', 'O', 'Q', 'U', 'X' };
+
+    private static final char[] DTX = { 'D', 'T', 'X' };
+
+    private static final char CHAR_IGNORE = '-';    // is this character to be ignored?
+
     /*
      * Returns whether the array contains the key, or not.
      */
@@ -305,15 +306,22 @@ public class ColognePhonetic implements StringEncoder {
     }
 
     /**
+     * Constructs a new instance.
+     */
+    public ColognePhonetic() {
+        // empty
+    }
+
+    /**
      * <p>
-     * Implements the <i>K&ouml;lner Phonetik</i> algorithm.
+     * Implements the <em>K&ouml;lner Phonetik</em> algorithm.
      * </p>
      * <p>
      * In contrast to the initial description of the algorithm, this implementation does the encoding in one pass.
      * </p>
      *
      * @param text The source text to encode
-     * @return the corresponding encoding according to the <i>K&ouml;lner Phonetik</i> algorithm
+     * @return the corresponding encoding according to the <em>K&ouml;lner Phonetik</em> algorithm
      */
     public String colognePhonetic(final String text) {
         if (text == null) {
@@ -343,7 +351,7 @@ public class ColognePhonetic implements StringEncoder {
 
             if (arrayContains(AEIJOUY, chr)) {
                 output.put('0');
-            } else if (chr == 'B' || (chr == 'P' && nextChar != 'H')) {
+            } else if (chr == 'B' || chr == 'P' && nextChar != 'H') {
                 output.put('1');
             } else if ((chr == 'D' || chr == 'T') && !arrayContains(CSZ, nextChar)) {
                 output.put('2');

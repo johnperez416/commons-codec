@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,13 @@ package org.apache.commons.codec;
 /**
  * Thrown when there is a failure condition during the decoding process. This exception is thrown when a {@link Decoder}
  * encounters a decoding specific exception such as invalid data, or characters outside of the expected range.
- *
  */
 public class DecoderException extends Exception {
 
     /**
      * Declares the Serial Version Uid.
      *
-     * @see <a href="http://c2.com/cgi/wiki?AlwaysDeclareSerialVersionUid">Always Declare Serial Version Uid</a>
+     * @see <a href="https://c2.com/cgi/wiki?AlwaysDeclareSerialVersionUid">Always Declare Serial Version Uid</a>
      */
     private static final long serialVersionUID = 1L;
 
@@ -56,6 +55,7 @@ public class DecoderException extends Exception {
      * <p>
      * Note that the detail message associated with {@code cause} is not automatically incorporated into this
      * exception's detail message.
+     * </p>
      *
      * @param message
      *            The detail message which is saved for later retrieval by the {@link #getMessage()} method.
@@ -69,8 +69,8 @@ public class DecoderException extends Exception {
     }
 
     /**
-     * Constructs a new exception with the specified cause and a detail message of <code>(cause==null ?
-     * null : cause.toString())</code> (which typically contains the class and detail message of {@code cause}).
+     * Constructs a new exception with the specified cause and a detail message of {@code (cause==null ?
+     * null : cause.toString())} (which typically contains the class and detail message of {@code cause}).
      * This constructor is useful for exceptions that are little more than wrappers for other throwables.
      *
      * @param cause

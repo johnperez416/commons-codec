@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,12 @@
 
 package org.apache.commons.codec.binary;
 
-import org.apache.commons.codec.CodecPolicy;
-
 import java.io.InputStream;
 
+import org.apache.commons.codec.CodecPolicy;
+
 /**
- * Provides Base16 encoding and decoding in a streaming fashion (unlimited size).
+ * Provides Base16 decoding in a streaming fashion (unlimited size).
  * <p>
  * The default behavior of the Base16InputStream is to DECODE, whereas the default behavior of the
  * {@link Base16OutputStream} is to ENCODE, but this behavior can be overridden by using a different constructor.
@@ -33,7 +33,7 @@ import java.io.InputStream;
 public class Base16InputStream extends BaseNCodecInputStream {
 
     /**
-     * Creates a Base16InputStream such that all data read is Base16-decoded from the original provided InputStream.
+     * Constructs a Base16InputStream such that all data read is Base16-decoded from the original provided InputStream.
      *
      * @param inputStream InputStream to wrap.
      */
@@ -42,7 +42,7 @@ public class Base16InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
+     * Constructs a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
      * provided InputStream.
      *
      * @param inputStream InputStream to wrap.
@@ -53,7 +53,7 @@ public class Base16InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
+     * Constructs a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
      * provided InputStream.
      *
      * @param inputStream InputStream to wrap.
@@ -66,7 +66,7 @@ public class Base16InputStream extends BaseNCodecInputStream {
     }
 
     /**
-     * Creates a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
+     * Constructs a Base16InputStream such that all data read is either Base16-encoded or Base16-decoded from the original
      * provided InputStream.
      *
      * @param inputStream InputStream to wrap.

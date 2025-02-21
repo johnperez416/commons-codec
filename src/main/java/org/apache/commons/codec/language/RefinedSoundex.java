@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import org.apache.commons.codec.StringEncoder;
  * <CITE>Margaret Odell</CITE> and <CITE>Robert Russell</CITE>.
  *
  * <p>This class is immutable and thread-safe.</p>
- *
  */
 public class RefinedSoundex implements StringEncoder {
 
@@ -57,17 +56,17 @@ public class RefinedSoundex implements StringEncoder {
     private static final char[] US_ENGLISH_MAPPING = US_ENGLISH_MAPPING_STRING.toCharArray();
 
     /**
+     * This static variable contains an instance of the RefinedSoundex using
+     * the US_ENGLISH mapping.
+     */
+    public static final RefinedSoundex US_ENGLISH = new RefinedSoundex();
+
+    /**
      * Every letter of the alphabet is "mapped" to a numerical value. This char
      * array holds the values to which each letter is mapped. This
      * implementation contains a default map for US_ENGLISH
      */
     private final char[] soundexMapping;
-
-    /**
-     * This static variable contains an instance of the RefinedSoundex using
-     * the US_ENGLISH mapping.
-     */
-    public static final RefinedSoundex US_ENGLISH = new RefinedSoundex();
 
      /**
      * Creates an instance of the RefinedSoundex object using the default US
@@ -117,7 +116,7 @@ public class RefinedSoundex implements StringEncoder {
      *             same from 0 to the length of the shortest encoded String.
      *
      * @see SoundexUtils#difference(StringEncoder,String,String)
-     * @see <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
+     * @see <a href="https://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
      *          MS T-SQL DIFFERENCE</a>
      *
      * @throws EncoderException
@@ -132,14 +131,14 @@ public class RefinedSoundex implements StringEncoder {
      * Encodes an Object using the refined soundex algorithm. This method is
      * provided in order to satisfy the requirements of the Encoder interface,
      * and will throw an EncoderException if the supplied object is not of type
-     * java.lang.String.
+     * {@link String}.
      *
      * @param obj
      *                  Object to encode
-     * @return An object (or type java.lang.String) containing the refined
+     * @return An object (or type {@link String}) containing the refined
      *             soundex code which corresponds to the String supplied.
      * @throws EncoderException
-     *                  if the parameter supplied is not of type java.lang.String
+     *                  if the parameter supplied is not of type {@link String}
      */
     @Override
     public Object encode(final Object obj) throws EncoderException {
@@ -174,7 +173,11 @@ public class RefinedSoundex implements StringEncoder {
         if (!Character.isLetter(c)) {
             return 0;
         }
-        return this.soundexMapping[Character.toUpperCase(c) - 'A'];
+        final int index = Character.toUpperCase(c) - 'A';
+        if (index < 0 || index >= this.soundexMapping.length) {
+            return 0;
+        }
+        return this.soundexMapping[index];
     }
 
     /**

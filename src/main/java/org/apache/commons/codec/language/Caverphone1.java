@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,8 @@ package org.apache.commons.codec.language;
  * This is an algorithm created by the Caversham Project at the University of Otago. It implements the Caverphone 1.0
  * algorithm:
  *
- * @see <a href="http://en.wikipedia.org/wiki/Caverphone">Wikipedia - Caverphone</a>
- * @see <a href="http://caversham.otago.ac.nz/files/working/ctp060902.pdf">Caverphone 1.0 specification</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Caverphone">Wikipedia - Caverphone</a>
+ * @see <a href="https://caversham.otago.ac.nz/files/working/ctp060902.pdf">Caverphone 1.0 specification</a>
  * @since 1.5
  *
  * <p>This class is immutable and thread-safe.</p>
@@ -34,11 +34,18 @@ public class Caverphone1 extends AbstractCaverphone {
     private static final String SIX_1 = "111111";
 
     /**
+     * Constructs a new instance.
+     */
+    public Caverphone1() {
+        // empty
+    }
+
+    /**
      * Encodes the given String into a Caverphone value.
      *
      * @param source
      *            String the source string
-     * @return A caverphone code for the given String
+     * @return A Caverphone code for the given String
      */
     @Override
     public String encode(final String source) {
@@ -117,7 +124,7 @@ public class Caverphone1 extends AbstractCaverphone {
         txt = txt.replace("3", "");
 
         // 6. put six 1s on the end
-        txt = txt + SIX_1;
+        txt += SIX_1;
 
         // 7. take the first six characters as the code
         return txt.substring(0, SIX_1.length());

@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,15 @@
 
 package org.apache.commons.codec.language;
 
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.StringEncoderAbstractTest;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.codec.AbstractStringEncoderTest;
+import org.apache.commons.codec.EncoderException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link DoubleMetaphone}.
@@ -30,10 +34,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @see "http://www.cuj.com/documents/s=8038/cuj0006philips/"
  */
-public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetaphone> {
+public class DoubleMetaphoneTest extends AbstractStringEncoderTest<DoubleMetaphone> {
 
     /**
-     * Test data from http://aspell.net/test/orig/batch0.tab.
+     * Test data from https://aspell.net/test/orig/batch0.tab.
      *
      * "Copyright (C) 2002 Kevin Atkinson (kevina@gnu.org). Verbatim copying
      * and distribution of this entire article is permitted in any medium,
@@ -1004,21 +1008,21 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
      * Tests encoding APIs in one place.
      */
     private void assertDoubleMetaphone(final String expected, final String source) {
-        assertEquals(expected, this.getStringEncoder().encode(source));
+        assertEquals(expected, getStringEncoder().encode(source));
         try {
-            assertEquals(expected, this.getStringEncoder().encode((Object) source));
+            assertEquals(expected, getStringEncoder().encode((Object) source));
         } catch (final EncoderException e) {
             fail("Unexpected exception: " + e);
         }
-        assertEquals(expected, this.getStringEncoder().doubleMetaphone(source));
-        assertEquals(expected, this.getStringEncoder().doubleMetaphone(source, false));
+        assertEquals(expected, getStringEncoder().doubleMetaphone(source));
+        assertEquals(expected, getStringEncoder().doubleMetaphone(source, false));
     }
 
     /**
      * Tests encoding APIs in one place.
      */
     public void assertDoubleMetaphoneAlt(final String expected, final String source) {
-        assertEquals(expected, this.getStringEncoder().doubleMetaphone(source, true));
+        assertEquals(expected, getStringEncoder().doubleMetaphone(source, true));
     }
 
     @Override
@@ -1027,44 +1031,49 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
     }
 
     public void doubleMetaphoneEqualTest(final String[][] pairs, final boolean useAlternate) {
-        this.validateFixture(pairs);
+        validateFixture(pairs);
         for (final String[] pair : pairs) {
             final String name0 = pair[0];
             final String name1 = pair[1];
             final String failMsg = "Expected match between " + name0 + " and " + name1 + " (use alternate: " + useAlternate + ")";
-            assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1, useAlternate), failMsg);
-            assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual(name1, name0, useAlternate), failMsg);
+            assertTrue(getStringEncoder().isDoubleMetaphoneEqual(name0, name1, useAlternate), failMsg);
+            assertTrue(getStringEncoder().isDoubleMetaphoneEqual(name1, name0, useAlternate), failMsg);
             if (!useAlternate) {
-                assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1), failMsg);
-                assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual(name1, name0), failMsg);
+                assertTrue(getStringEncoder().isDoubleMetaphoneEqual(name0, name1), failMsg);
+                assertTrue(getStringEncoder().isDoubleMetaphoneEqual(name1, name0), failMsg);
             }
         }
     }
 
     public void doubleMetaphoneNotEqualTest(final boolean alternate) {
-        assertFalse(this.getStringEncoder().isDoubleMetaphoneEqual("Brain", "Band", alternate));
-        assertFalse(this.getStringEncoder().isDoubleMetaphoneEqual("Band", "Brain", alternate));
+        assertFalse(getStringEncoder().isDoubleMetaphoneEqual("Brain", "Band", alternate));
+        assertFalse(getStringEncoder().isDoubleMetaphoneEqual("Band", "Brain", alternate));
 
         if (!alternate) {
-            assertFalse(this.getStringEncoder().isDoubleMetaphoneEqual("Brain", "Band"));
-            assertFalse(this.getStringEncoder().isDoubleMetaphoneEqual("Band", "Brain"));
+            assertFalse(getStringEncoder().isDoubleMetaphoneEqual("Brain", "Band"));
+            assertFalse(getStringEncoder().isDoubleMetaphoneEqual("Band", "Brain"));
         }
     }
 
     @Test
     public void testCCedilla() {
-        assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual("\u00e7", "S")); // c-cedilla
+        assertTrue(getStringEncoder().isDoubleMetaphoneEqual("\u00e7", "S")); // c-cedilla
     }
 
     @Test
-    public void testCodec184() throws Throwable {
+    public void testCodec184() {
         assertTrue(new DoubleMetaphone().isDoubleMetaphoneEqual("", "", false));
         assertTrue(new DoubleMetaphone().isDoubleMetaphoneEqual("", "", true));
         assertFalse(new DoubleMetaphone().isDoubleMetaphoneEqual("aa", "", false));
         assertFalse(new DoubleMetaphone().isDoubleMetaphoneEqual("aa", "", true));
         assertFalse(new DoubleMetaphone().isDoubleMetaphoneEqual("", "aa", false));
         assertFalse(new DoubleMetaphone().isDoubleMetaphoneEqual("", "aa", true));
-      }
+    }
+
+    @Test
+    public void testCodec320() {
+        assertTrue(new DoubleMetaphone().isDoubleMetaphoneEqual("ANGHELINA", "ANKL", false));
+    }
 
     @Test
     public void testDoubleMetaphone() {
@@ -1109,10 +1118,10 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
 
     @Test
     public void testEmpty() {
-        assertNull(this.getStringEncoder().doubleMetaphone(null));
-        assertNull(this.getStringEncoder().doubleMetaphone(""));
-        assertNull(this.getStringEncoder().doubleMetaphone(" "));
-        assertNull(this.getStringEncoder().doubleMetaphone("\t\n\r "));
+        assertNull(getStringEncoder().doubleMetaphone(null));
+        assertNull(getStringEncoder().doubleMetaphone(""));
+        assertNull(getStringEncoder().doubleMetaphone(" "));
+        assertNull(getStringEncoder().doubleMetaphone("\t\n\r "));
     }
 
     @Test
@@ -1158,7 +1167,7 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
      */
     @Test
     public void testIsDoubleMetaphoneEqualExtended3() {
-        this.validateFixture(FIXTURE);
+        validateFixture(FIXTURE);
         final StringBuilder failures = new StringBuilder();
         final StringBuilder matches = new StringBuilder();
         final String cr = System.lineSeparator();
@@ -1167,8 +1176,8 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
         for (int i = 0; i < FIXTURE.length; i++) {
             final String name0 = FIXTURE[i][0];
             final String name1 = FIXTURE[i][1];
-            final boolean match1 = this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1, false);
-            final boolean match2 = this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1, true);
+            final boolean match1 = getStringEncoder().isDoubleMetaphoneEqual(name0, name1, false);
+            final boolean match2 = getStringEncoder().isDoubleMetaphoneEqual(name0, name1, true);
             if (!match1 && !match2) {
                 final String failMsg = "[" + i + "] " + name0 + " and " + name1 + cr;
                 failures.append(failMsg);
@@ -1190,12 +1199,12 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
 
     @Test
     public void testIsDoubleMetaphoneEqualWithMATCHES() {
-        this.validateFixture(MATCHES);
+        validateFixture(MATCHES);
         for (int i = 0; i < MATCHES.length; i++) {
             final String name0 = MATCHES[i][0];
             final String name1 = MATCHES[i][1];
-            final boolean match1 = this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1, false);
-            final boolean match2 = this.getStringEncoder().isDoubleMetaphoneEqual(name0, name1, true);
+            final boolean match1 = getStringEncoder().isDoubleMetaphoneEqual(name0, name1, false);
+            final boolean match2 = getStringEncoder().isDoubleMetaphoneEqual(name0, name1, true);
             if (!match1 && !match2) {
                 fail("Expected match [" + i + "] " + name0 + " and " + name1);
             }
@@ -1210,7 +1219,7 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
 
     @Test
     public void testNTilde() {
-        assertTrue(this.getStringEncoder().isDoubleMetaphoneEqual("\u00f1", "N")); // n-tilde
+        assertTrue(getStringEncoder().isDoubleMetaphoneEqual("\u00f1", "N")); // n-tilde
     }
 
     /**
@@ -1224,13 +1233,13 @@ public class DoubleMetaphoneTest extends StringEncoderAbstractTest<DoubleMetapho
 
         // Sanity check of default settings
         assertEquals(4, doubleMetaphone.getMaxCodeLen(), "Default Max Code Length");
-        assertEquals(  "JMPT", doubleMetaphone.doubleMetaphone(value, false), "Default Primary");
+        assertEquals("JMPT", doubleMetaphone.doubleMetaphone(value, false), "Default Primary");
         assertEquals("AMPT", doubleMetaphone.doubleMetaphone(value, true), "Default Alternate");
 
         // Check setting Max Code Length
         doubleMetaphone.setMaxCodeLen(3);
         assertEquals(3, doubleMetaphone.getMaxCodeLen(), "Set Max Code Length");
-        assertEquals(  "JMP", doubleMetaphone.doubleMetaphone(value, false), "Max=3 Primary");
+        assertEquals("JMP", doubleMetaphone.doubleMetaphone(value, false), "Max=3 Primary");
         assertEquals("AMP", doubleMetaphone.doubleMetaphone(value, true), "Max=3 Alternate");
     }
 

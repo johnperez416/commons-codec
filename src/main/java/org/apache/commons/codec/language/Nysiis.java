@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,10 @@ import org.apache.commons.codec.StringEncoder;
  * general purpose scheme to find word with similar phonemes.
  * <p>
  * NYSIIS features an accuracy increase of 2.7% over the traditional Soundex algorithm.
+ * </p>
  * <p>
  * Algorithm description:
+ * </p>
  * <pre>
  * 1. Transcode first characters of name
  *   1a. MAC -&gt;   MCC
@@ -60,8 +62,9 @@ import org.apache.commons.codec.StringEncoder;
  * </pre>
  * <p>
  * This class is immutable and thread-safe.
+ * </p>
  *
- * @see <a href="http://en.wikipedia.org/wiki/NYSIIS">NYSIIS on Wikipedia</a>
+ * @see <a href="https://en.wikipedia.org/wiki/NYSIIS">NYSIIS on Wikipedia</a>
  * @see <a href="http://www.dropby.com/NYSIIS.html">NYSIIS on dropby.com</a>
  * @see Soundex
  * @since 1.7
@@ -126,7 +129,6 @@ public class Nysiis implements StringEncoder {
         }
 
         // 2. Q -> G, Z -> S, M -> N
-
 
         // 3. KN -> NN else K -> C
         switch (curr) {
@@ -212,7 +214,7 @@ public class Nysiis implements StringEncoder {
         if (!(obj instanceof String)) {
             throw new EncoderException("Parameter supplied to Nysiis encode is not of type java.lang.String");
         }
-        return this.nysiis((String) obj);
+        return nysiis((String) obj);
     }
 
     /**
@@ -226,7 +228,7 @@ public class Nysiis implements StringEncoder {
      */
     @Override
     public String encode(final String str) {
-        return this.nysiis(str);
+        return nysiis(str);
     }
 
     /**
@@ -314,7 +316,7 @@ public class Nysiis implements StringEncoder {
         }
 
         final String string = key.toString();
-        return this.isStrict() ? string.substring(0, Math.min(TRUE_LENGTH, string.length())) : string;
+        return isStrict() ? string.substring(0, Math.min(TRUE_LENGTH, string.length())) : string;
     }
 
 }

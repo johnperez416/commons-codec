@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ public class BaseNCodecInputStream extends FilterInputStream {
     private final Context context = new Context();
 
     /**
-     * Create an instance.
+     * Constructs a new instance.
      *
      * @param inputStream the input stream
      * @param baseNCodec the codec
@@ -66,11 +66,10 @@ public class BaseNCodecInputStream extends FilterInputStream {
      */
     @Override
     public int available() throws IOException {
-        // Note: the logic is similar to the InflaterInputStream:
+        // Note: The logic is similar to the InflaterInputStream:
         //       as long as we have not reached EOF, indicate that there is more
         //       data available. As we do not know for sure how much data is left,
         //       just return 1 as a safe guess.
-
         return context.eof ? 0 : 1;
     }
 
@@ -78,8 +77,10 @@ public class BaseNCodecInputStream extends FilterInputStream {
      * Returns true if decoding behavior is strict. Decoding will raise an
      * {@link IllegalArgumentException} if trailing bits are not part of a valid encoding.
      *
-     * <p>The default is false for lenient encoding. Decoding will compose trailing bits
+     * <p>
+     * The default is false for lenient encoding. Decoding will compose trailing bits
      * into 8-bit bytes and discard the remainder.
+     * </p>
      *
      * @return true if using strict decoding
      * @since 1.15
@@ -90,7 +91,9 @@ public class BaseNCodecInputStream extends FilterInputStream {
 
     /**
      * Marks the current position in this input stream.
-     * <p>The {@link #mark} method of {@link BaseNCodecInputStream} does nothing.</p>
+     * <p>
+     * The {@link #mark} method of {@link BaseNCodecInputStream} does nothing.
+     * </p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid.
      * @see #markSupported()
@@ -153,10 +156,7 @@ public class BaseNCodecInputStream extends FilterInputStream {
     @Override
     public int read(final byte[] array, final int offset, final int len) throws IOException {
         Objects.requireNonNull(array, "array");
-        if (offset < 0 || len < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (offset > array.length || offset + len > array.length) {
+        if (offset < 0 || len < 0 || offset > array.length || offset + len > array.length) {
             throw new IndexOutOfBoundsException();
         }
         if (len == 0) {
@@ -205,6 +205,7 @@ public class BaseNCodecInputStream extends FilterInputStream {
      * Repositions this stream to the position at the time the mark method was last called on this input stream.
      * <p>
      * The {@link #reset} method of {@link BaseNCodecInputStream} does nothing except throw an {@link IOException}.
+     * </p>
      *
      * @throws IOException if this method is invoked
      * @since 1.7
@@ -225,11 +226,9 @@ public class BaseNCodecInputStream extends FilterInputStream {
         if (n < 0) {
             throw new IllegalArgumentException("Negative skip length: " + n);
         }
-
         // skip in chunks of 512 bytes
         final byte[] b = new byte[512];
         long todo = n;
-
         while (todo > 0) {
             int len = (int) Math.min(b.length, todo);
             len = this.read(b, 0, len);
@@ -238,7 +237,6 @@ public class BaseNCodecInputStream extends FilterInputStream {
             }
             todo -= len;
         }
-
         return n - todo;
     }
 }

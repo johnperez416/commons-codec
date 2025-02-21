@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,7 +75,7 @@ final class SoundexUtils {
      *             are the same.
      *
      * @see #differenceEncoded(String,String)
-     * @see <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
+     * @see <a href="https://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
      *          MS T-SQL DIFFERENCE</a>
      *
      * @throws EncoderException
@@ -102,7 +102,7 @@ final class SoundexUtils {
      * @return The number of characters in the two Soundex encoded Strings that
      *             are the same.
      *
-     * @see <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
+     * @see <a href="https://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_de-dz_8co5.asp">
      *          MS T-SQL DIFFERENCE</a>
      */
     static int differenceEncoded(final String es1, final String es2) {
@@ -133,7 +133,6 @@ final class SoundexUtils {
      *
      * @param cs  the CharSequence to check, may be null
      * @return {@code true} if the CharSequence is empty or null
-     * @since 1.16
      */
     static boolean isEmpty(final CharSequence cs) {
         return cs == null || cs.length() == 0;

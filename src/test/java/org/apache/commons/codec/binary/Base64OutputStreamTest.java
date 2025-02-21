@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,46 +17,35 @@
 
 package org.apache.commons.codec.binary;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.codec.CodecPolicy;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * @since 1.4
+ * Tests {@link Base64OutputStream}.
  */
 public class Base64OutputStreamTest {
 
-    private final static byte[] CR_LF = {(byte) '\r', (byte) '\n'};
+    private static final byte[] CR_LF = {(byte) '\r', (byte) '\n'};
 
-    private final static byte[] LF = {(byte) '\n'};
+    private static final byte[] LF = {(byte) '\n'};
 
     private static final String STRING_FIXTURE = "Hello World";
 
-    /**
-     * Test the Base64OutputStream implementation against the special NPE inducing input
-     * identified in the CODEC-98 bug.
-     *
-     * @throws Exception for some failure scenarios.
-     */
-    @Test
-    public void testCodec98NPE() throws Exception {
-        final byte[] codec98 = StringUtils.getBytesUtf8(Base64TestData.CODEC_98_NPE);
-        final byte[] codec98_1024 = new byte[1024];
-        System.arraycopy(codec98, 0, codec98_1024, 0, codec98.length);
-        final ByteArrayOutputStream data = new ByteArrayOutputStream(1024);
-        try (final Base64OutputStream stream = new Base64OutputStream(data, false)) {
-            stream.write(codec98_1024, 0, 1024);
-        }
-
-        final byte[] decodedBytes = data.toByteArray();
-        final String decoded = StringUtils.newStringUtf8(decodedBytes);
-        assertEquals(Base64TestData.CODEC_98_NPE_DECODED, decoded, "codec-98 NPE Base64OutputStream");
+    private void testBase64EmptyOutputStream(final int chunkSize) throws Exception {
+        final byte[] emptyEncoded = {};
+        final byte[] emptyDecoded = {};
+        testByteByByte(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
+        testByChunk(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
     }
-
 
     /**
      * Test the Base64OutputStream implementation against empty input.
@@ -78,13 +67,6 @@ public class Base64OutputStreamTest {
     @Test
     public void testBase64EmptyOutputStreamPemChunkSize() throws Exception {
         testBase64EmptyOutputStream(BaseNCodec.PEM_CHUNK_SIZE);
-    }
-
-    private void testBase64EmptyOutputStream(final int chunkSize) throws Exception {
-        final byte[] emptyEncoded = {};
-        final byte[] emptyDecoded = {};
-        testByteByByte(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
-        testByChunk(emptyEncoded, emptyDecoded, chunkSize, CR_LF);
     }
 
     /**
@@ -187,23 +169,23 @@ public class Base64OutputStreamTest {
 
         // Start with encode.
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        OutputStream out = new Base64OutputStream(byteOut, true, chunkSize, separator);
-        out.write(decoded);
-        out.close();
+        try (OutputStream out = new Base64OutputStream(byteOut, true, chunkSize, separator)) {
+            out.write(decoded);
+        }
         byte[] output = byteOut.toByteArray();
         assertArrayEquals(encoded, output, "Streaming chunked base64 encode");
 
         // Now let's try to decode.
         byteOut = new ByteArrayOutputStream();
-        out = new Base64OutputStream(byteOut, false);
-        out.write(encoded);
-        out.close();
+        try (OutputStream out = new Base64OutputStream(byteOut, false)) {
+            out.write(encoded);
+        }
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming chunked base64 decode");
 
         // I always wanted to do this! (wrap encoder with decoder etc.).
         byteOut = new ByteArrayOutputStream();
-        out = byteOut;
+        OutputStream out = byteOut;
         for (int i = 0; i < 10; i++) {
             out = new Base64OutputStream(out, false);
             out = new Base64OutputStream(out, true, chunkSize, separator);
@@ -237,38 +219,38 @@ public class Base64OutputStreamTest {
 
         // Start with encode.
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        OutputStream out = new Base64OutputStream(byteOut, true, chunkSize, separator);
-        for (final byte element : decoded) {
-            out.write(element);
+        try (OutputStream out = new Base64OutputStream(byteOut, true, chunkSize, separator)) {
+            for (final byte element : decoded) {
+                out.write(element);
+            }
         }
-        out.close();
         byte[] output = byteOut.toByteArray();
         assertArrayEquals(encoded, output, "Streaming byte-by-byte base64 encode");
 
         // Now let's try to decode.
         byteOut = new ByteArrayOutputStream();
-        out = new Base64OutputStream(byteOut, false);
-        for (final byte element : encoded) {
-            out.write(element);
+        try (OutputStream out = new Base64OutputStream(byteOut, false)) {
+            for (final byte element : encoded) {
+                out.write(element);
+            }
         }
-        out.close();
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming byte-by-byte base64 decode");
 
         // Now let's try to decode with tonnes of flushes.
         byteOut = new ByteArrayOutputStream();
-        out = new Base64OutputStream(byteOut, false);
-        for (final byte element : encoded) {
-            out.write(element);
-            out.flush();
+        try (OutputStream out = new Base64OutputStream(byteOut, false)) {
+            for (final byte element : encoded) {
+                out.write(element);
+                out.flush();
+            }
         }
-        out.close();
         output = byteOut.toByteArray();
         assertArrayEquals(decoded, output, "Streaming byte-by-byte flush() base64 decode");
 
         // I always wanted to do this! (wrap encoder with decoder etc.).
         byteOut = new ByteArrayOutputStream();
-        out = byteOut;
+        OutputStream out = byteOut;
         for (int i = 0; i < 10; i++) {
             out = new Base64OutputStream(out, false);
             out = new Base64OutputStream(out, true, chunkSize, separator);
@@ -283,35 +265,24 @@ public class Base64OutputStreamTest {
     }
 
     /**
-     * Tests Base64OutputStream.write for expected IndexOutOfBoundsException conditions.
+     * Test the Base64OutputStream implementation against the special NPE inducing input
+     * identified in the CODEC-98 bug.
      *
-     * @throws Exception
-     *             for some failure scenarios.
+     * @throws Exception for some failure scenarios.
      */
     @Test
-    public void testWriteOutOfBounds() throws Exception {
-        final byte[] buf = new byte[1024];
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try (final Base64OutputStream out = new Base64OutputStream(bout)) {
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, -1, 1), "Base64OutputStream.write(buf, -1, 1)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, 1, -1), "Base64OutputStream.write(buf, 1, -1)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length + 1, 0), "Base64OutputStream.write(buf, buf.length + 1, 0)");
-            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length - 1, 2), "Base64OutputStream.write(buf, buf.length - 1, 2)");
+    public void testCodec98NPE() throws Exception {
+        final byte[] codec98 = StringUtils.getBytesUtf8(Base64TestData.CODEC_98_NPE);
+        final byte[] codec98_1024 = new byte[1024];
+        System.arraycopy(codec98, 0, codec98_1024, 0, codec98.length);
+        final ByteArrayOutputStream data = new ByteArrayOutputStream(1024);
+        try (Base64OutputStream stream = new Base64OutputStream(data, false)) {
+            stream.write(codec98_1024, 0, 1024);
         }
-    }
 
-    /**
-     * Tests Base64OutputStream.write(null).
-     *
-     * @throws Exception
-     *             for some failure scenarios.
-     */
-    @Test
-    public void testWriteToNullCoverage() throws Exception {
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try (final Base64OutputStream out = new Base64OutputStream(bout)) {
-            assertThrows(NullPointerException.class, () -> out.write(null, 0, 0));
-        }
+        final byte[] decodedBytes = data.toByteArray();
+        final String decoded = StringUtils.newStringUtf8(decodedBytes);
+        assertEquals(Base64TestData.CODEC_98_NPE_DECODED, decoded, "codec-98 NPE Base64OutputStream");
     }
 
     /**
@@ -341,6 +312,38 @@ public class Base64OutputStreamTest {
                 out.write(impossibleEncoded);
                 out.close();
             });
+        }
+    }
+
+    /**
+     * Tests Base64OutputStream.write for expected IndexOutOfBoundsException conditions.
+     *
+     * @throws Exception
+     *             for some failure scenarios.
+     */
+    @Test
+    public void testWriteOutOfBounds() throws Exception {
+        final byte[] buf = new byte[1024];
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try (Base64OutputStream out = new Base64OutputStream(bout)) {
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, -1, 1), "Base64OutputStream.write(buf, -1, 1)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, 1, -1), "Base64OutputStream.write(buf, 1, -1)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length + 1, 0), "Base64OutputStream.write(buf, buf.length + 1, 0)");
+            assertThrows(IndexOutOfBoundsException.class, () -> out.write(buf, buf.length - 1, 2), "Base64OutputStream.write(buf, buf.length - 1, 2)");
+        }
+    }
+
+    /**
+     * Tests Base64OutputStream.write(null).
+     *
+     * @throws Exception
+     *             for some failure scenarios.
+     */
+    @Test
+    public void testWriteToNullCoverage() throws Exception {
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try (Base64OutputStream out = new Base64OutputStream(bout)) {
+            assertThrows(NullPointerException.class, () -> out.write(null, 0, 0));
         }
     }
 }
